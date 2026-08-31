@@ -1,0 +1,600 @@
+<title>Democracy 3 Policy Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,800;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#E9EDF0; --card:#FBFCFD; --card-2:#F2F5F8;
+  --ink:#101720; --ink-soft:#5A6672; --ink-faint:#8894A0;
+  --rule:#C7D0D8; --rule-soft:#DDE4EA;
+  --accent:#1B4F8A; --accent-soft:#DCE7F3; --accent-ink:#12395F;
+  --good:#26714F; --bad:#A8382C; --warn:#8A5F0F;
+  --good-bg:#DFEDE6; --bad-bg:#F5E1DE; --warn-bg:#F3E9D5;
+  --shadow:0 1px 0 rgba(16,23,32,.05), 0 2px 8px rgba(16,23,32,.05);
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0E1419; --card:#151D24; --card-2:#1B242D;
+  --ink:#E6EBEF; --ink-soft:#94A2AE; --ink-faint:#6E7D8A;
+  --rule:#26323C; --rule-soft:#1F2A33;
+  --accent:#6BA3E0; --accent-soft:#17293D; --accent-ink:#9CC4EE;
+  --good:#57B98C; --bad:#E0776A; --warn:#D6A54A;
+  --good-bg:#152A22; --bad-bg:#2E1A18; --warn-bg:#2B2415;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 10px rgba(0,0,0,.28);
+}}
+:root[data-theme="dark"]{
+  --paper:#0E1419; --card:#151D24; --card-2:#1B242D;
+  --ink:#E6EBEF; --ink-soft:#94A2AE; --ink-faint:#6E7D8A;
+  --rule:#26323C; --rule-soft:#1F2A33;
+  --accent:#6BA3E0; --accent-soft:#17293D; --accent-ink:#9CC4EE;
+  --good:#57B98C; --bad:#E0776A; --warn:#D6A54A;
+  --good-bg:#152A22; --bad-bg:#2E1A18; --warn-bg:#2B2415;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 10px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;padding:0 0 48px}
+h1,h2,h3{margin:0;text-wrap:balance}
+button{font:inherit;color:inherit}
+.wrap{max-width:1340px;margin:0 auto;padding:0 20px}
+
+/* ---- masthead ---- */
+.masthead{border-bottom:2px solid var(--ink);background:var(--card);margin-bottom:18px}
+.mast-in{max-width:1340px;margin:0 auto;padding:18px 20px 0;
+  display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between}
+.brand h1{font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:-.015em;line-height:1.05}
+.brand .sub{font-size:12px;color:var(--ink-soft);margin-top:5px;max-width:62ch}
+.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+  font-weight:600;margin-bottom:5px}
+.mast-tools{display:flex;gap:8px;align-items:center;padding-bottom:14px;flex-wrap:wrap}
+
+/* ---- readout strip ---- */
+.strip{max-width:1340px;margin:0 auto;padding:0 20px;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:1px solid var(--rule)}
+.stat{padding:10px 14px 12px;border-right:1px solid var(--rule-soft)}
+.stat:last-child{border-right:0}
+.stat .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+.stat .v{font-family:var(--mono);font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;
+  margin-top:3px;letter-spacing:-.02em}
+.stat .d{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+
+/* ---- layout ---- */
+.cols{display:grid;grid-template-columns:minmax(320px,400px) 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow)}
+.panel+.panel{margin-top:16px}
+.panel>header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:11px 14px;border-bottom:1px solid var(--rule)}
+.panel>header h2{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:-.01em}
+.panel>header .hint{font-size:11px;color:var(--ink-faint)}
+.pad{padding:12px 14px}
+.rail{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
+@media(max-width:900px){.rail{position:static;max-height:none}}
+
+/* ---- controls ---- */
+.eco{padding:12px 14px;border-bottom:1px solid var(--rule);background:var(--card-2)}
+.eco-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.eco-head b{font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.eco-val{font-family:var(--mono);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.eco-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--ink-faint);margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 0;cursor:pointer}
+input[type=search],input[type=text]{width:100%;padding:6px 9px;border:1px solid var(--rule);
+  border-radius:3px;background:var(--card);color:var(--ink);font:inherit;font-size:13px}
+.btn{border:1px solid var(--rule);background:var(--card);border-radius:3px;padding:5px 10px;
+  font-size:12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.dept{border-bottom:1px solid var(--rule-soft)}
+.dept>summary{padding:9px 14px;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:center;gap:8px;list-style:none;font-size:12px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft)}
+.dept>summary::-webkit-details-marker{display:none}
+.dept>summary:hover{color:var(--accent);background:var(--card-2)}
+.dept>summary .count{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-weight:400}
+.pol{padding:7px 14px 9px;border-top:1px solid var(--rule-soft)}
+.pol.off{opacity:.5}
+.pol-top{display:flex;align-items:center;gap:8px}
+.pol-name{flex:1;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  cursor:help}
+.pol-val{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--ink-soft);
+  min-width:34px;text-align:right}
+.sw{width:26px;height:15px;border-radius:8px;border:1px solid var(--rule);background:var(--card-2);
+  position:relative;cursor:pointer;flex:0 0 auto;padding:0;transition:background .12s}
+.sw::after{content:"";position:absolute;top:1px;left:1px;width:11px;height:11px;border-radius:50%;
+  background:var(--ink-faint);transition:transform .12s,background .12s}
+.sw[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.sw[aria-pressed="true"]::after{transform:translateX(11px);background:#fff}
+.pol.chg .pol-name{font-weight:600;color:var(--accent)}
+
+/* ---- outcomes ---- */
+.zone{margin-bottom:2px}
+.zone-h{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+  font-weight:600;padding:12px 14px 5px;border-bottom:1px solid var(--rule-soft)}
+.row{display:grid;grid-template-columns:1fr 128px 64px 58px;gap:10px;align-items:center;
+  padding:5px 14px;border-bottom:1px solid var(--rule-soft);cursor:pointer;font-size:12.5px}
+.row:hover{background:var(--card-2)}
+.row.sel{background:var(--accent-soft)}
+.row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .num{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;text-align:right}
+.row .dl{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;text-align:right}
+.bar{height:7px;background:var(--card-2);border:1px solid var(--rule-soft);border-radius:2px;
+  position:relative;overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;left:0;background:var(--ink-faint);border-radius:1px}
+.bar i.g{background:var(--good)} .bar i.b{background:var(--bad)}
+.bar u{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--accent);opacity:.85}
+.up{color:var(--good)} .dn{color:var(--bad)} .flat{color:var(--ink-faint)}
+
+/* ---- chips ---- */
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:11px;
+  font-size:11.5px;border:1px solid var(--rule);background:var(--card-2);color:var(--ink-soft)}
+.chip.on-bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad);font-weight:500}
+.chip.on-good{background:var(--good-bg);border-color:var(--good);color:var(--good);font-weight:500}
+.chip .pc{font-family:var(--mono);font-size:10px;opacity:.75}
+.chip.new::before{content:"NEW";font-size:8.5px;letter-spacing:.08em;font-weight:700;
+  background:var(--accent);color:var(--card);padding:1px 3px;border-radius:2px}
+.chip.gone{text-decoration:line-through;opacity:.55}
+
+/* ---- dilemmas ---- */
+.dil{padding:8px 14px;border-bottom:1px solid var(--rule-soft);display:grid;
+  grid-template-columns:1fr 90px 56px;gap:10px;align-items:center}
+.dil .nm{font-size:12.5px}
+.dil .why{font-size:10.5px;color:var(--ink-faint);font-family:var(--mono)}
+.meter{height:6px;background:var(--card-2);border:1px solid var(--rule-soft);border-radius:2px;position:relative;overflow:hidden}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--warn)}
+
+/* ---- why drawer ---- */
+.why-h{font-family:var(--serif);font-size:15px;font-weight:600}
+.why-sub{font-size:11.5px;color:var(--ink-soft);margin:3px 0 10px}
+.contrib{display:grid;grid-template-columns:1fr 96px 66px;gap:10px;align-items:center;
+  padding:4px 0;border-bottom:1px solid var(--rule-soft);font-size:12px}
+.contrib .f{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contrib .v{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;text-align:right}
+.cbar{height:6px;position:relative;background:var(--card-2);border-radius:2px}
+.cbar i{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:1px}
+.empty{padding:16px 14px;color:var(--ink-faint);font-size:12.5px}
+.note{font-size:11.5px;color:var(--ink-soft);padding:10px 14px;border-top:1px solid var(--rule-soft);
+  background:var(--card-2)}
+.note b{color:var(--ink)}
+footer{max-width:1340px;margin:22px auto 0;padding:14px 20px 0;border-top:1px solid var(--rule);
+  font-size:11.5px;color:var(--ink-faint);max-width:80ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="masthead">
+  <div class="mast-in">
+    <div class="brand">
+      <div class="eyebrow">Paper simulation &middot; equilibrium at zero delay</div>
+      <h1>Democracy 3 Policy Bench</h1>
+      <p class="sub">Move a slider and the whole feedback network is re&#8209;solved to its settled state &mdash;
+      every loop closed, no implementation delay, no turn order. What you see is where the country
+      <em>ends up</em>, not what happens next week.</p>
+    </div>
+    <div class="mast-tools">
+      <button class="btn" id="pin">Pin as baseline</button>
+      <button class="btn" id="reset">Reset to US start</button>
+      <button class="btn" id="theme" aria-label="Toggle colour theme">Theme</button>
+    </div>
+  </div>
+  <div class="strip" id="strip"></div>
+</div>
+
+<div class="wrap cols">
+  <div>
+    <div class="panel rail">
+      <div class="eco">
+        <div class="eco-head"><b>World economy</b><span class="eco-val" id="ecoV">0.50</span></div>
+        <input type="range" id="eco" min="0" max="1" step="0.01" value="0.5">
+        <div class="eco-scale"><span>deep bust</span><span>average</span><span>boom</span></div>
+      </div>
+      <div class="pad" style="border-bottom:1px solid var(--rule)">
+        <input type="search" id="find" placeholder="Filter policies&hellip;" aria-label="Filter policies">
+      </div>
+      <div id="depts"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <header>
+        <h2>Outcomes at equilibrium</h2>
+        <span class="hint">click a row to see what drives it</span>
+      </header>
+      <div id="outcomes"></div>
+      <div class="note"><b>Reading the numbers.</b> These are the game's own internal scales, mostly
+      0&ndash;1, and they are <em>not</em> comparable across rows &mdash; a 0.1 move in Life Expectancy and a
+      0.1 move in Crime are different things in the world. Colour marks the direction of change against
+      your pinned baseline, using the game's own good/bad flag; rows the data leaves unflagged stay grey
+      rather than being assigned a direction we cannot source.</div>
+    </div>
+
+    <div class="panel" id="whyPanel" hidden>
+      <header><h2>What drives it</h2><span class="hint">contributions at the settled state</span></header>
+      <div class="pad" id="why"></div>
+    </div>
+
+    <div class="panel">
+      <header><h2>Crises</h2><span class="hint" id="critCount"></span></header>
+      <div class="chips" id="sits"></div>
+      <div class="note"><b>Hysteresis, not a line.</b> A crisis switches on above its start trigger and
+      only switches off below a <em>lower</em> stop trigger. Between the two both states are
+      self&#8209;consistent, so the same country can sit in a good or a bad basin on identical policy.
+      That gap is why escaping one is harder than avoiding it.</div>
+    </div>
+
+    <div class="panel">
+      <header><h2>Dilemma pressure</h2><span class="hint">state-driven only</span></header>
+      <div id="dils"></div>
+      <div class="note"><b>Pressure, not a prediction.</b> This is the deterministic half of each
+      dilemma's trigger score, computed from the state you have built. The engine's firing threshold is
+      not in the shipped data, so these rank which dilemmas your country is <em>inviting</em> &mdash; they do
+      not say one will fire. The 26 dilemmas driven purely by a random roll are left out entirely.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Model parsed from the simulation CSVs shipped with Democracy 3 (Positech Games) &mdash; 97 nodes,
+  1,149 effect edges, 123 policies, 36 crises, 54 dilemmas. The equilibrium here is the same fixed point
+  the project's Python solver computes, run in the browser. Six sources the network references but never
+  defines (<span style="font-family:var(--mono)">_effectivedebt_</span>,
+  <span style="font-family:var(--mono)">_global_interest_rates_</span>, the
+  <span style="font-family:var(--mono)">*_perc</span> membership values) resolve to zero, exactly as in
+  the solver &mdash; so debt and interest feedback are absent here too.
+</footer>
+
+<script type="application/json" id="model">__MODEL_JSON__</script>
+<script>
+(function(){
+"use strict";
+const M = JSON.parse(document.getElementById("model").textContent);
+const NODES = M.nodes, EDGES = M.edges, POLS = M.policies;
+const CONST = "_default_";
+
+/* ---------- formula evaluator: walks the AST exported by the Python parser ---------- */
+function ev(n, x, S){
+  if (typeof n === "number") return n;
+  if (n === "x") return x;
+  switch(n[0]){
+    case "r": { const v = S[n[1]]; return v === undefined ? 0 : v; }
+    case "u": return -ev(n[1],x,S);
+    case "+": return ev(n[1],x,S) + ev(n[2],x,S);
+    case "-": return ev(n[1],x,S) - ev(n[2],x,S);
+    case "*": return ev(n[1],x,S) * ev(n[2],x,S);
+    case "/": { const d = ev(n[2],x,S); return d ? ev(n[1],x,S)/d : 0; }
+    case "^": return Math.pow(ev(n[1],x,S), ev(n[2],x,S));
+  }
+  return 0;
+}
+
+/* ---------- incoming index + node metadata (mirrors network.py / solver.py) ---------- */
+const INC = {};
+for (const e of EDGES){ (INC[e.t] || (INC[e.t] = [])).push(e); }
+const META = {}, SITS = [];
+for (const k in NODES){
+  const n = NODES[k];
+  META[k] = [n.def, n.min, n.max];
+  if (n.kind === "situation") SITS.push(k);
+}
+const isSit = {}; for (const s of SITS) isSit[s] = 1;
+const clamp = (v,lo,hi) => v < lo ? lo : v > hi ? hi : v;
+
+function solve(policies, economy){
+  const fixed = Object.assign({}, M.exogenous, policies);
+  fixed["_globaleconomy_"] = economy;
+  fixed[CONST] = 0;
+  const S = Object.assign({}, fixed);
+  for (const k in META) S[k] = clamp(META[k][0], META[k][1], META[k][2]);
+  const act = {}; for (const s of SITS) act[s] = !!M.situationsActive[s];
+
+  let it = 0, delta = 0;
+  for (it = 1; it <= 600; it++){
+    for (const s of SITS){
+      const n = NODES[s];
+      if (!act[s] && S[s] >= n.start) act[s] = true;
+      else if (act[s] && S[s] < n.stop) act[s] = false;
+    }
+    const next = {};
+    for (const k in META){
+      const m = META[k]; let t = m[0];
+      const es = INC[k];
+      if (es) for (let i=0;i<es.length;i++){
+        const e = es[i];
+        if (isSit[e.s] && !act[e.s]) continue;
+        const xv = S[e.s]; t += ev(e.a, xv === undefined ? 0 : xv, S);
+      }
+      next[k] = clamp(t, m[1], m[2]);
+    }
+    delta = 0;
+    for (const k in META){
+      const u = S[k] + 0.5*(next[k] - S[k]);
+      const d = Math.abs(u - S[k]); if (d > delta) delta = d;
+      S[k] = u;
+    }
+    if (delta < 1e-6) break;
+  }
+  return {S:S, active:act, iters:it, delta:delta};
+}
+
+/* contributions into one node at a settled state — the "why" */
+function contributions(node, R){
+  const out = [], es = INC[node] || [];
+  for (const e of es){
+    if (isSit[e.s] && !R.active[e.s]) continue;
+    const xv = R.S[e.s];
+    out.push({src:e.s, f:e.f, v:ev(e.a, xv === undefined ? 0 : xv, R.S)});
+  }
+  out.sort((a,b)=>Math.abs(b.v)-Math.abs(a.v));
+  return out;
+}
+
+/* ---------- state ---------- */
+const start = {}; for (const k in POLS) start[k] = POLS[k].start;
+let cur = Object.assign({}, start);
+let economy = M.meta.economy_default != null ? M.meta.economy_default : 0.5;
+let baseline = null, selected = null;
+const offVal = {};   // remembers a policy's level while it is switched off
+
+const fmt = (v,d)=> (v>=0?"":"") + v.toFixed(d===undefined?3:d);
+const sign = v => (v>0?"+":"") + v.toFixed(3);
+
+/* ---------- render: controls ---------- */
+const deptOrder = ["TAX","ECONOMY","WELFARE","PUBLICSERVICES","LAWANDORDER","TRANSPORT","FOREIGNPOLICY"];
+const deptName = {TAX:"Tax", ECONOMY:"Economy", WELFARE:"Welfare", PUBLICSERVICES:"Public services",
+  LAWANDORDER:"Law and order", TRANSPORT:"Transport", FOREIGNPOLICY:"Foreign policy", Other:"Other"};
+const byDept = {};
+for (const k in POLS){ const d = POLS[k].dept; (byDept[d]||(byDept[d]=[])).push(k); }
+for (const d in byDept) byDept[d].sort((a,b)=>POLS[a].gui.localeCompare(POLS[b].gui));
+
+const deptsEl = document.getElementById("depts");
+function buildControls(){
+  const order = deptOrder.filter(d=>byDept[d]).concat(Object.keys(byDept).filter(d=>deptOrder.indexOf(d)<0));
+  deptsEl.innerHTML = order.map(d=>{
+    const rows = byDept[d].map(k=>{
+      const p = POLS[k];
+      return '<div class="pol" data-p="'+k+'" data-name="'+p.gui.toLowerCase()+'">'
+        + '<div class="pol-top">'
+        +   '<button class="sw" data-sw="'+k+'" aria-pressed="false" aria-label="Enact '+esc(p.gui)+'"></button>'
+        +   '<span class="pol-name" title="'+esc(p.desc||p.gui)+'">'+esc(p.gui)+'</span>'
+        +   '<span class="pol-val" data-v="'+k+'">0.00</span>'
+        + '</div>'
+        + '<input type="range" data-r="'+k+'" min="0" max="1" step="0.01" value="0" aria-label="'+esc(p.gui)+' level">'
+        + '</div>';
+    }).join("");
+    return '<details class="dept"'+(d==="TAX"?" open":"")+'>'
+      + '<summary>'+esc(deptName[d]||d)+'<span class="count">'+byDept[d].length+'</span></summary>'
+      + rows + '</details>';
+  }).join("");
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function syncControls(){
+  for (const k in POLS){
+    const v = cur[k], on = v > 1e-9;
+    const row = deptsEl.querySelector('[data-p="'+k+'"]'); if (!row) continue;
+    row.classList.toggle("off", !on);
+    row.classList.toggle("chg", Math.abs(v - start[k]) > 1e-6);
+    row.querySelector('[data-sw="'+k+'"]').setAttribute("aria-pressed", on ? "true":"false");
+    row.querySelector('[data-v="'+k+'"]').textContent = v.toFixed(2);
+    const r = row.querySelector('[data-r="'+k+'"]'); if (r.value != v) r.value = v;
+  }
+}
+
+/* ---------- render: outcomes ---------- */
+const zoneName = {ECONOMY:"Economy", WELFARE:"Welfare", PUBLICSERVICES:"Public services",
+  LAWANDORDER:"Law and order", TRANSPORT:"Transport", FOREIGNPOLICY:"Foreign policy", HIDDEN:"Hidden"};
+const simKeys = Object.keys(NODES).filter(k=>NODES[k].kind==="sim");
+const zones = {};
+for (const k of simKeys){ const z = NODES[k].zone||"Other"; (zones[z]||(zones[z]=[])).push(k); }
+for (const z in zones) zones[z].sort((a,b)=>NODES[a].gui.localeCompare(NODES[b].gui));
+
+function renderOutcomes(R){
+  const base = baseline ? baseline.S : null;
+  const html = Object.keys(zones).sort().map(z=>{
+    const rows = zones[z].map(k=>{
+      const n = NODES[k], v = R.S[k], span = (n.max-n.min)||1;
+      const pct = Math.max(0,Math.min(100, 100*(v-n.min)/span));
+      const d = base ? v - base[k] : 0;
+      let cls = "flat", arrow = "";
+      if (base && Math.abs(d) > 5e-4){
+        if (n.emotion === "HIGHGOOD"){ cls = d>0?"up":"dn"; }
+        else if (n.emotion === "HIGHBAD"){ cls = d>0?"dn":"up"; }
+        arrow = (d>0?"▲":"▼");
+      }
+      const fill = n.emotion==="HIGHGOOD" ? "g" : n.emotion==="HIGHBAD" ? "b" : "";
+      const mark = base ? '<u style="left:'+Math.max(0,Math.min(100,100*(base[k]-n.min)/span))+'%"></u>' : "";
+      return '<div class="row'+(selected===k?" sel":"")+'" data-n="'+k+'" role="button" tabindex="0">'
+        + '<span class="nm" title="'+esc(n.desc||n.gui)+'">'+esc(n.gui)+'</span>'
+        + '<span class="bar"><i class="'+fill+'" style="width:'+pct+'%"></i>'+mark+'</span>'
+        + '<span class="num">'+v.toFixed(3)+'</span>'
+        + '<span class="dl '+cls+'">'+(base && Math.abs(d)>5e-4 ? arrow+Math.abs(d).toFixed(3) : "–")+'</span>'
+        + '</div>';
+    }).join("");
+    return '<div class="zone"><div class="zone-h">'+esc(zoneName[z]||z)+'</div>'+rows+'</div>';
+  }).join("");
+  document.getElementById("outcomes").innerHTML = html;
+}
+
+/* ---------- render: crises ---------- */
+function renderSits(R){
+  const base = baseline ? baseline.active : null;
+  const items = SITS.slice().sort((a,b)=>{
+    const av = R.active[a]?0:1, bv = R.active[b]?0:1;
+    return av-bv || NODES[a].gui.localeCompare(NODES[b].gui);
+  });
+  let onCount = 0, badCount = 0;
+  const html = items.map(k=>{
+    const n = NODES[k], on = R.active[k];
+    if (on){ onCount++; if (!n.positive) badCount++; }
+    const changed = base ? (on !== !!base[k]) : false;
+    let cls = "chip";
+    if (on) cls += n.positive ? " on-good" : " on-bad";
+    if (changed && on) cls += " new";
+    if (changed && !on) cls += " gone";
+    return '<span class="'+cls+'" title="'+esc(n.gui)+' — value '+R.S[k].toFixed(3)
+      + ', starts above '+n.start+', stops below '+n.stop+'">'
+      + esc(n.gui) + '<span class="pc">'+R.S[k].toFixed(2)+'</span></span>';
+  }).join("");
+  document.getElementById("sits").innerHTML = html;
+  document.getElementById("critCount").textContent = onCount + " active · " + badCount + " harmful";
+}
+
+/* ---------- render: dilemma pressure ---------- */
+const stateDilemmas = M.dilemmas.filter(d=>d.influences.length);
+function renderDilemmas(R){
+  const scored = stateDilemmas.map(d=>{
+    let s = 0; const parts = [];
+    for (const inf of d.influences){
+      const xv = inf.source === CONST ? 0 : R.S[inf.source];
+      const v = ev(inf.ast, xv === undefined ? 0 : xv, R.S);
+      s += v; if (inf.source !== CONST) parts.push(inf.source);
+    }
+    return {d:d, s:s, parts:parts};
+  }).sort((a,b)=>b.s-a.s);
+  const top = Math.max(...scored.map(x=>Math.abs(x.s)), 1);
+  document.getElementById("dils").innerHTML = scored.map(x=>
+    '<div class="dil"><div><div class="nm" title="'+esc(x.d.description)+'">'+esc(x.d.guiname)+'</div>'
+    + '<div class="why">'+esc(x.parts.join(", ")||"constant")+'</div></div>'
+    + '<span class="meter"><i style="width:'+Math.max(0,Math.min(100,100*x.s/top))+'%"></i></span>'
+    + '<span class="num" style="font-family:var(--mono);font-size:11.5px;text-align:right">'+x.s.toFixed(2)+'</span>'
+    + '</div>').join("");
+}
+
+/* ---------- render: strip + why ---------- */
+function renderStrip(R){
+  const items = [
+    ["Iterations to settle", String(R.iters), R.delta < 1e-6 ? "converged" : "did not settle"],
+    ["GDP", R.S["GDP"].toFixed(3), delta("GDP", R)],
+    ["Unemployment", R.S["Unemployment"].toFixed(3), delta("Unemployment", R)],
+    ["Crime", R.S["CrimeRate"].toFixed(3), delta("CrimeRate", R)],
+    ["Health", R.S["Health"].toFixed(3), delta("Health", R)],
+    ["Equality", R.S["Equality"].toFixed(3), delta("Equality", R)],
+    ["Active crises", String(SITS.filter(s=>R.active[s]).length), baseline
+      ? (SITS.filter(s=>R.active[s]).length - SITS.filter(s=>baseline.active[s]).length >= 0 ? "+" : "")
+        + (SITS.filter(s=>R.active[s]).length - SITS.filter(s=>baseline.active[s]).length) + " vs baseline"
+      : "–"]
+  ];
+  document.getElementById("strip").innerHTML = items.map(i=>
+    '<div class="stat"><div class="k">'+esc(i[0])+'</div><div class="v">'+esc(i[1])+'</div>'
+    + '<div class="d">'+esc(i[2])+'</div></div>').join("");
+}
+function delta(k, R){
+  if (!baseline) return "–";
+  const d = R.S[k] - baseline.S[k];
+  return (Math.abs(d) < 5e-4) ? "no change" : (d>0?"+":"") + d.toFixed(3) + " vs baseline";
+}
+
+function renderWhy(R){
+  const p = document.getElementById("whyPanel");
+  if (!selected){ p.hidden = true; return; }
+  p.hidden = false;
+  const n = NODES[selected], cs = contributions(selected, R);
+  const top = Math.max(...cs.map(c=>Math.abs(c.v)), 1e-6);
+  const rows = cs.slice(0,14).map(c=>{
+    const src = NODES[c.src] ? NODES[c.src].gui : (POLS[c.src] ? POLS[c.src].gui : c.src);
+    const w = 100*Math.abs(c.v)/top, pos = c.v >= 0;
+    return '<div class="contrib"><div><div>'+esc(src)+'</div><div class="f">'+esc(c.f)+'</div></div>'
+      + '<span class="cbar"><i style="'+(pos?"left:50%":"right:50%")+';width:'+(w/2)+'%;background:'
+      + (pos?"var(--good)":"var(--bad)")+'"></i></span>'
+      + '<span class="v">'+sign(c.v)+'</span></div>';
+  }).join("");
+  const sum = cs.reduce((a,c)=>a+c.v,0);
+  document.getElementById("why").innerHTML =
+    '<div class="why-h">'+esc(n.gui)+'</div>'
+    + '<div class="why-sub">'+esc(n.desc||"")+'</div>'
+    + '<div class="contrib" style="border-bottom-width:2px;font-weight:600">'
+    +   '<div>Base value '+n.def.toFixed(3)+' + '+cs.length+' live inputs</div>'
+    +   '<span></span><span class="v">'+ (n.def+sum).toFixed(3) +'</span></div>'
+    + rows
+    + (cs.length>14 ? '<div class="empty">'+(cs.length-14)+' smaller inputs not shown</div>' : "")
+    + (Math.abs(n.def+sum - R.S[selected])>1e-3
+        ? '<div class="empty">Settled at '+R.S[selected].toFixed(3)+' — the sum above is clamped to the '
+          + n.min+'–'+n.max+' range.</div>' : "");
+}
+
+/* ---------- drive ---------- */
+let pending = false;
+function refresh(){
+  if (pending) return;
+  pending = true;
+  requestAnimationFrame(()=>{
+    pending = false;
+    const R = solve(cur, economy);
+    renderStrip(R); renderOutcomes(R); renderSits(R); renderDilemmas(R); renderWhy(R);
+    window.__R = R;
+  });
+}
+
+buildControls(); syncControls();
+document.getElementById("eco").value = economy;
+document.getElementById("ecoV").textContent = economy.toFixed(2);
+
+deptsEl.addEventListener("input", e=>{
+  const k = e.target.getAttribute("data-r"); if (!k) return;
+  cur[k] = parseFloat(e.target.value);
+  const row = e.target.closest(".pol");
+  row.querySelector('[data-v="'+k+'"]').textContent = cur[k].toFixed(2);
+  row.classList.toggle("off", !(cur[k] > 1e-9));
+  row.classList.toggle("chg", Math.abs(cur[k]-start[k]) > 1e-6);
+  row.querySelector('[data-sw="'+k+'"]').setAttribute("aria-pressed", cur[k] > 1e-9 ? "true":"false");
+  refresh();
+});
+deptsEl.addEventListener("click", e=>{
+  const k = e.target.getAttribute && e.target.getAttribute("data-sw"); if (!k) return;
+  if (cur[k] > 1e-9){ offVal[k] = cur[k]; cur[k] = 0; }
+  else { cur[k] = offVal[k] || start[k] || 0.5; }
+  syncControls(); refresh();
+});
+document.getElementById("eco").addEventListener("input", e=>{
+  economy = parseFloat(e.target.value);
+  document.getElementById("ecoV").textContent = economy.toFixed(2);
+  refresh();
+});
+document.getElementById("find").addEventListener("input", e=>{
+  const q = e.target.value.trim().toLowerCase();
+  deptsEl.querySelectorAll(".pol").forEach(el=>{
+    el.hidden = q && el.getAttribute("data-name").indexOf(q) < 0;
+  });
+  if (q) deptsEl.querySelectorAll("details").forEach(d=>d.open = true);
+});
+document.getElementById("outcomes").addEventListener("click", e=>{
+  const row = e.target.closest(".row"); if (!row) return;
+  const k = row.getAttribute("data-n");
+  selected = (selected === k) ? null : k;
+  refresh();
+  if (selected) document.getElementById("whyPanel").scrollIntoView({behavior:"smooth", block:"nearest"});
+});
+document.getElementById("outcomes").addEventListener("keydown", e=>{
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const row = e.target.closest(".row"); if (!row) return;
+  e.preventDefault(); row.click();
+});
+document.getElementById("pin").addEventListener("click", ()=>{
+  baseline = solve(cur, economy);
+  document.getElementById("pin").textContent = "Baseline pinned ✓";
+  setTimeout(()=>{document.getElementById("pin").textContent = "Pin as baseline";}, 1400);
+  refresh();
+});
+document.getElementById("reset").addEventListener("click", ()=>{
+  cur = Object.assign({}, start); economy = 0.5;
+  document.getElementById("eco").value = 0.5;
+  document.getElementById("ecoV").textContent = "0.50";
+  syncControls(); refresh();
+});
+const root = document.documentElement;
+document.getElementById("theme").addEventListener("click", ()=>{
+  const now = root.getAttribute("data-theme");
+  const dark = now ? now === "dark"
+    : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  root.setAttribute("data-theme", dark ? "light" : "dark");
+});
+
+baseline = solve(cur, economy);   // the US start is the default comparison point
+refresh();
+})();
+</script>

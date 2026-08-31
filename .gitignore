@@ -10,3 +10,7 @@ __pycache__/
 venv/
 build/
 dist/
+
+# built explorer page (regenerate with scripts/build_explorer.py)
+explorer.html
+explorer_model.json
