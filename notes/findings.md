@@ -219,3 +219,62 @@ infinite value, so ties broke arbitrarily and the move budget went on `+0.0000` 
 rank by size among themselves, which took the same test from 41% to 101%. A ratio that divides by zero
 cannot order the things it returns infinity for — they need their own key.
 
+## Can the budget be grounded in the CSVs instead of a savegame? Yes — a bug was hiding it
+
+Chris asked whether the cost model could be grounded in the CSVs rather than anchored to a save.
+`budget.py` said no, on the grounds that the CSV's cost and income figures are in different internal
+units. Checking that claim instead of accepting it turned up something else: **`raw_cost` was
+returning *negative or zero* costs for four of the five largest US programmes.**
+
+| policy | raw_cost (before) | actual |
+|---|---|---|
+| Military Spending | **−425.6** | $248Bn |
+| State Pensions | **0.0** | $215Bn |
+| State Schools | −201.8 | $102Bn |
+| Police Force | −67.5 | $36Bn |
+
+The cause is one line of grammar. `notes/grammar.md` states that **`_default_,k` sets a constant base
+term**, and `_multiplier_value` was multiplying by it like any other factor. For
+`_default_,1.0;Wages,-0.1+(0.2*x)` at Wages = 0.26 the correct value is `1.0 + (−0.048) = 0.952`;
+multiplying gives `−0.048`. The sign inverts, and the biggest programmes in the game price at less
+than nothing.
+
+Fixed: a `_default_` term is a base the other factors *add* to; without one the factors multiply as
+before. With that corrected, **31 of the 32 enacted policies agree on a single CSV→$ conversion
+constant to within ±11%** (median **0.0265** in the save's calibrated frame):
+
+```
+State Pensions 0.0257   Border Controls 0.0259   Foreign Aid 0.0259
+Pollution Ctrl 0.0260   Space Program   0.0260   ... 31 of 32 inside 0.024–0.030
+```
+
+One conversion constant across 31 independent policies is not a coincidence — it is the unit scale.
+So CSV grounding is reachable, and needs exactly two more things:
+
+1. **The `*_perc` membership values.** The single outlier is Food Stamps (0.0078), whose multiplier
+   reads `Poor_perc` — one of the values the network references but never defines, so `state.get`
+   substitutes the *policy setting*. Same story for Winter Fuel Subsidy's `Retired_perc`.
+2. **The unit constant derived rather than calibrated.** 0.0265 currently comes out of the save's
+   $1,191Bn/$1,288Bn anchors. `data/missions/<country>/` ships `population`, `min_gdp`/`max_gdp`,
+   `min_income`/`max_income` and `wealth_mod` — the obvious candidates for computing it from first
+   principles, which would drop the savegame dependency completely and generalise to all six
+   countries at once.
+
+### Correction to the marginal rankings above
+
+The bug did not touch the average-value tables — every programme in them is anchored, so `raw_cost`
+was never called. It did not touch either replacement portfolio — none of those policies use
+`_default_`. Only **7 of 123** policies use it at all, and five are anchored.
+
+But two are not, and both were reported above as the top jobs buys:
+
+| | reported | actual |
+|---|---|---|
+| Healthcare Vouchers | $0Bn, **19.87** per $100Bn | $115.7Bn, **0.0053** |
+| Health Tax Credits | $0Bn, **18.83** per $100Bn | $60.0Bn, **0.0050** |
+
+They were not the best buys in the game; they are among the worst, and they looked free because their
+cost multiplier had been sign-inverted. **A policy that appears to deliver an outcome for nothing is a
+bug report, not a bargain** — the same instinct that flagged `X = 3.000` as worth checking should have
+flagged a $0Bn price tag on a $115Bn programme.
+

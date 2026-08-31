@@ -32,16 +32,47 @@ def _parse_multiplier(spec: str) -> list[tuple[str, Formula]]:
     return out
 
 
+_DEFAULT_FACTOR = "_default_"
+
+
 def _multiplier_value(spec: str, setting: float, state: Mapping[str, float]) -> float:
-    """Product of the multiplier factors. x for each factor = its node value, else the setting
-    (rough proxy — e.g. TaxEvasion, which we don't solve, scales with the tax rate)."""
-    prod = 1.0
+    """Evaluate a ``Factor,formula`` multiplier list.
+
+    ``notes/grammar.md``: **"``_default_,k`` sets a constant base term"** — a base the other factors
+    adjust, not another thing to multiply by. Treating it as a factor is not a rounding error, it
+    inverts the sign: ``_default_,1.0;Wages,-0.1+(0.2*x)`` at Wages=0.26 is ``1.0 + (-0.048) = 0.95``,
+    but multiplying gives ``-0.048``. That made Military Spending, State Pensions, State Schools and
+    Police Force evaluate to a *negative or zero* cost, which is why the CSV cost path was unusable
+    and everything had to be anchored to a savegame instead.
+
+    With the base handled correctly, 31 of the 32 enacted policies agree on a single CSV→$ conversion
+    constant to within ±11% (median 0.0265 in the save's calibrated frame). The lone holdout is Food
+    Stamps, whose multiplier reads ``Poor_perc`` — one of the ``*_perc`` membership values the network
+    never defines, so ``state.get`` falls back to the policy setting. Resolving those would close the
+    last gap and let the budget be grounded in the CSVs alone.
+
+    x for each non-default factor is its node value, else the setting (a rough proxy — e.g. TaxEvasion,
+    which we don't solve, scales with the tax rate).
+    """
+    base: float | None = None
+    others: list[float] = []
     for factor, f in _parse_multiplier(spec):
+        if factor == _DEFAULT_FACTOR:
+            try:
+                base = f.evaluate(0.0, state)   # a constant; its formula ignores x
+            except Exception:
+                pass
+            continue
         x = float(state.get(factor, setting))
         try:
-            prod *= f.evaluate(x, state)
+            others.append(f.evaluate(x, state))
         except Exception:
             pass
+    if base is not None:
+        return base + sum(others)
+    prod = 1.0
+    for v in others:
+        prod *= v
     return prod
 
 
