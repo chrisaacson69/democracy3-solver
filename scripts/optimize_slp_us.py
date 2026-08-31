@@ -1,5 +1,10 @@
-"""SLP optimizer on the US save (welfare objective) — the principled constrained optimizer.
-Prints convergence trace + recommended policy set (net changes) for comparison with greedy/Pravus.
+"""Trust-region SLP on the US save (welfare objective) — the principled *local* constrained optimizer.
+
+Prints the trust-region trace plus the recommended policy set. Read `rho` as the honesty check on each
+step: it is the ratio of the merit gain actually achieved to the one the linear model promised, so a
+low `rho` means the linearization was lying there and the step is rejected and the region shrunk. For
+the *global* counterpart — which also chooses which situations are active, rather than freezing them —
+see `scripts/milp_us.py`.
 """
 
 from __future__ import annotations
@@ -38,10 +43,15 @@ def main() -> None:
     res = slp_optimize(model, cur, exo, obj, ab, csv.cost_k, csv.income_k,
                        init_values=seed_state, init_active=seed_active, freeze_active=True)
 
-    print("SLP trace (iter: phase obj balance move):")
+    print("SLP trust-region trace (rho = actual/predicted merit gain; a bad step is rejected):")
     for i, t in enumerate(res["trace"]):
-        print(f"  {i:2d}: p{t['phase']}  X={t['obj']:+.3f}  bal=${t['balance']:+6.0f}Bn  move={t['move']:.3f}")
-    print(f"\nfinal: X={res['obj']:.3f}  balance=${res['balance']:.0f}Bn  iters={len(res['trace'])}\n")
+        verdict = "accept" if t["accepted"] else "REJECT"
+        print(f"  {i:2d}: X={t['obj']:+.3f}  bal=${t['balance']:+6.0f}Bn  merit={t['merit']:+.3f}  "
+              f"rho={t['rho']:+7.2f}  radius={t['radius']:.3f}  move={t['move']:.3f}  {verdict}")
+    feas = "feasible" if res.get("feasible") else "INFEASIBLE"
+    kept = sum(1 for t in res["trace"] if t["accepted"])
+    print(f"\nfinal: X={res['obj']:.3f}  balance=${res['balance']:.0f}Bn  ({feas})  "
+          f"iters={len(res['trace'])}  steps kept={kept}\n")
 
     changes = [(n, cur[n], res["settings"][n], res["settings"][n] - cur[n])
                for n in cur if abs(res["settings"][n] - cur[n]) > 1e-3]

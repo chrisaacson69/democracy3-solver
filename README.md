@@ -22,7 +22,7 @@ execute it: given a policy vector, compute the equilibrium state, budget, and vo
 *conversion* of the game's own data (cross-checkable against the running game), not a rebuild — so it
 doubles as the verifier for everything above it.
 
-**Layer 2 — the optimizer (later).** Proposes policy vectors; **every candidate is scored by Layer 1**.
+**Layer 2 — the optimizer.** Proposes policy vectors; **every candidate is scored by Layer 1**.
 - **Linearized LP** around an operating point → marginal analysis ("best votes-per-$ move now").
 - **MILP** (piecewise-linear the polynomial effects + binary situation triggers) → global-ish solve.
 - Objective is **user-defined X over outcomes + finances**, maximized s.t. `budget_balance ≥ 0`. There
@@ -41,10 +41,25 @@ the tractable approximations; the simulator keeps them honest.
       first-class/endogenous, `balance ≥ 0`, voting/capital/delay out of scope.
 - [x] **Combination rule — confirmed** (`scripts/check_combination.py` vs the US save):
       `value = clamp(default + Σ influenceᵢ)`. See `notes/grammar.md`.
-- [ ] **Layer 1 — equilibrium solver.** In progress: `savegame.py` (oracle parser) + `network.py`
-      (incoming-edge index) done. Next: load `situations.csv` + active state from the save; add
-      `_globaleconomy_`/`_year`; then the iterative fixed-point solve + endogenous budget.
-- [ ] **Layer 2 — optimizer.** Constrained max of X s.t. `balance ≥ 0`: linearized LP → MILP.
+- [x] **Layer 1 — equilibrium solver.** Running against the live game CSVs: converges in ~50
+      iterations, situations resolved self-consistently via hysteresis, budget reconstructed from the
+      save's anchors. **Not yet validated against an independent oracle** — see the open item below.
+- [x] **Layer 2 — optimizer.** Both halves built; see [`notes/layer2.md`](notes/layer2.md).
+      **Trust-region SLP** (`optimize.slp_optimize`) — local, situations frozen, ℓ1-penalty merit
+      function with step acceptance and an adaptive region. **MILP** (`milp.refine_milp`) — the whole
+      network as one mixed-integer program in ~514 binaries, with the **situation flags as decision
+      variables**, so it can search for a basin escape rather than inheriting one. Every candidate from
+      either is re-scored by Layer 1, which remains the arbiter.
+- [ ] **Validate Layer 1 against an independent oracle.** The current check is against a turn-1
+      savegame — a *transient*, not an equilibrium. `data/simulation/data_dump/{inputs,outputs}` is the
+      oracle this repo's `CLAUDE.md` names, but both directories ship **empty**: the game only writes
+      them under some debug condition we have not found. That prerequisite is the real blocker.
+- [ ] **Un-zero the finance + membership subsystems.** `_effectivedebt_`, `_global_interest_rates_` and
+      the `*_perc` membership values are still unresolved sources (11 are reported in
+      `MilpSolution.problems` on every MILP run), so loop gain is too low to hold the game's doom basin.
+      `data/simconfig.txt` (interest rates, credit ratings, `DEBT_TO_GDP_MAX`) and `data/missions/*/`
+      (per-country income bands, GDP range, population, starting debt) are shipped, grounded, and not
+      yet read by the loader.
 
 ## Setup
 
@@ -62,9 +77,19 @@ of truth — no copy, no drift).
 ```
 src/d3solver/
   formula.py   effect-formula parser + safe evaluator
-  model.py     typed model (SimValue, Policy, VoterType, Effect, GameModel)
+  model.py     typed model (SimValue, Policy, VoterType, Situation, Effect, GameModel)
   loader.py    CSV loaders; collects parse problems, never fabricates
   config.py    resolve the data dir (env or config.toml)
+  network.py   reverse adjacency: target -> incoming edges
+  savegame.py  autosave.xml parser (policy settings, sim values, situation flags)
+  solver.py    Layer 1 — the iterative equilibrium fixed point (the oracle)
+  budget.py    reconstructed cost/income, anchored to the save's $ figures
+  optimize.py  Layer 2 local — marginal frontier, greedy, and the trust-region SLP
+  pwl.py       Layer 2 support — affine detection + error-driven piecewise-linear grids
+  milp.py      Layer 2 global — the network as a MILP, with situation flags as binaries
 notes/grammar.md   the CSV grammar, grounded in the shipped data
-tests/             formula tests (incl. the shipped typos)
+notes/scope.md     the agreed problem statement
+notes/layer2.md    the two optimizers: encoding, what is approximate, how to read the results
+scripts/           runnable drivers (solve_us, frontier, optimize_*, milp_us)
+tests/             formula, PWL, and MILP-vs-solver agreement tests
 ```

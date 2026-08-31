@@ -177,63 +177,130 @@ def gradient_optimize(model, p0, exo, objective, ab, csv_cost_k, csv_income_k, *
 
 def slp_optimize(model, p0, exo, objective, ab, csv_cost_k, csv_income_k, *,
                  init_values=None, init_active=None, freeze_active=True,
-                 delta=0.15, iters=20, fd_eps=0.05, tol=1e-3, surplus_cap=50.0,
-                 delta_decay=0.15, policies=None):
-    """Sequential Linear Programming — the principled optimizer.
+                 delta=0.25, iters=40, fd_eps=0.05, tol=1e-3, policies=None,
+                 balance_min=0.0, balance_max=None,
+                 eta_accept=0.1, eta_expand=0.75, delta_min=0.002, delta_max=0.5,
+                 mu_min=0.0):
+    """Sequential Linear Programming with a real trust region -- the principled local optimizer.
 
-    Each iteration: (1) evaluate X and balance at p; (2) finite-difference the Jacobians dX/dp and
-    dBalance/dp through the equilibrium (this is the recurrent net's local gradient); (3) an LP takes the
-    constrained step within a trust region |Δp|≤delta and bounds [0,1]:
-        - while in deficit  -> maximize the balance improvement (restore feasibility);
-        - once solvent      -> maximize linearized X subject to balance stays ≥ 0.
-    The LP handles the hard balance constraint exactly (no penalty/lr tuning — the failure mode of the
-    gradient version). Re-linearize and repeat until the step is tiny.
+    Each iteration linearizes X and the budget balance through the equilibrium by finite differences,
+    then solves an LP for the best step inside a trust region. What makes it a *trust-region* method,
+    and what the earlier version of this function lacked, is the last part of that loop:
+
+    * an **exact ell-1 penalty merit function** ``phi = X - mu * violation(balance)`` gives one number
+      that ranks any two points, so restoring the budget and improving X stop being separate phases
+      that can undo each other;
+    * ``mu`` is set from the measured gradient ratio ``max|dX/dp| / max|dBalance/dp|``, which is what
+      makes the penalty scale-free -- the ill-conditioning that made the projected-gradient version
+      diverge was $Bn and X-units being compared with a hand-tuned constant;
+    * the LP is **elastic** (violation enters as a penalized slack), so a step always exists and no
+      separate feasibility phase is needed; and
+    * every step is **tested before it is kept**. The ratio ``rho`` of actual to predicted merit gain
+      decides: reject and shrink the region when the linear model was lying, accept and expand it when
+      the model was good. The previous version accepted every LP step unconditionally and shrank the
+      region on a fixed decay schedule regardless, which is why its trace was non-monotone in X and
+      swung the balance by over $1500Bn between iterations.
+
+    ``balance_max`` is a genuine constraint when supplied (it replaces the old ``surplus_cap`` hack of
+    capping the LP step): the merit function penalizes overshoot above it symmetrically.
     """
     import pulp
 
     plist = list(policies or model.policies)
     p = {n: float(p0.get(n, 0.0)) for n in plist}
-    trace = []
 
     def ev(settings):
         return evaluate(model, settings, exo, objective, ab, csv_cost_k, csv_income_k,
                         init_values, init_active, freeze_active)
 
-    for t in range(iters):
-        delta_t = delta / (1.0 + delta_decay * t)       # shrink trust region -> convergence
-        baseO, baseB, _ = ev(p)
+    def violation(b):
+        v = max(0.0, balance_min - b)
+        if balance_max is not None:
+            v += max(0.0, b - balance_max)
+        return v
+
+    base_obj, base_bal, _ = ev(p)
+    radius, mu = delta, 0.0
+    trace = []
+
+    for _ in range(iters):
+        # Measure the gradient at the scale the step will actually be taken; a difference taken over
+        # 0.05 says little about a move of 0.001, and the mismatch shows up as a meaningless rho.
+        eps_t = max(min(fd_eps, radius), delta_min)
         gX, gB = {}, {}
         for n in plist:
-            probe, sign = min(1.0, p[n] + fd_eps), 1.0
-            if abs(probe - p[n]) < 1e-12:
-                probe, sign = max(0.0, p[n] - fd_eps), -1.0
-            pp = dict(p); pp[n] = probe
+            probe, sign = min(1.0, p[n] + eps_t), 1.0
+            if abs(probe - p[n]) < 1e-12:                # at the upper bound -> probe downward
+                probe, sign = max(0.0, p[n] - eps_t), -1.0
+            pp = dict(p)
+            pp[n] = probe
             o, b, _ = ev(pp)
-            gX[n] = sign * (o - baseO) / fd_eps
-            gB[n] = sign * (b - baseB) / fd_eps
+            gX[n] = sign * (o - base_obj) / eps_t
+            gB[n] = sign * (b - base_bal) / eps_t
+
+        # Penalty weight. An exact ell-1 penalty needs mu above the constraint's Lagrange multiplier;
+        # the LP hands us an estimate of exactly that as the shadow price on the balance row, so the
+        # first pass seeds mu from the gradient ratio and every later pass raises it to clear the
+        # measured dual. mu only ever increases -- that is what makes the penalty exact.
+        mx = max((abs(v) for v in gX.values()), default=0.0)
+        mb = max((abs(v) for v in gB.values()), default=0.0)
+        if mb > 1e-12:
+            mu = max(mu, mu_min, 4.0 * mx / mb)
 
         prob = pulp.LpProblem("slp_step", pulp.LpMaximize)
-        d = {n: pulp.LpVariable(f"d{i}", lowBound=max(-delta_t, -p[n]), upBound=min(delta_t, 1.0 - p[n]))
+        d = {n: pulp.LpVariable(f"d{i}", lowBound=max(-radius, -p[n]),
+                                upBound=min(radius, 1.0 - p[n]))
              for i, n in enumerate(plist)}
-        bal_expr = baseB + pulp.lpSum(gB[n] * d[n] for n in plist)
-        if baseB < 0:                                   # phase 1: restore the budget
-            prob += pulp.lpSum(gB[n] * d[n] for n in plist)
-        else:                                           # phase 2: maximize X within a near-balanced budget
-            prob += pulp.lpSum(gX[n] * d[n] for n in plist)
-            prob += bal_expr >= 0
-            prob += bal_expr <= surplus_cap             # spend the surplus, don't hoard it
+        s_lo = pulp.LpVariable("s_lo", lowBound=0.0)      # elastic slack: shortfall below balance_min
+        s_hi = pulp.LpVariable("s_hi", lowBound=0.0)      # elastic slack: overshoot above balance_max
+        bal_lin = base_bal + pulp.lpSum(gB[n] * d[n] for n in plist)
+        prob += bal_lin >= balance_min - s_lo, "bal_floor"
+        if balance_max is not None:
+            prob += bal_lin <= balance_max + s_hi, "bal_cap"
+        else:
+            prob += s_hi == 0, "no_cap"
+        prob += pulp.lpSum(gX[n] * d[n] for n in plist) - mu * (s_lo + s_hi)
         prob.solve(pulp.PULP_CBC_CMD(msg=0))
 
+        # Raise mu to clear the shadow price on the budget row and re-solve, so the step we test is
+        # the one a correctly-weighted penalty would have chosen.
+        try:
+            pi = abs(float(prob.constraints["bal_floor"].pi or 0.0))
+        except (KeyError, TypeError, ValueError):
+            pi = 0.0
+        if pi > mu:
+            mu = 2.0 * pi
+            prob.objective = pulp.lpSum(gX[n] * d[n] for n in plist) - mu * (s_lo + s_hi)
+            prob.solve(pulp.PULP_CBC_CMD(msg=0))
+
         step = {n: (d[n].value() or 0.0) for n in plist}
-        move = max(abs(v) for v in step.values()) if step else 0.0
-        for n in plist:
-            p[n] = min(1.0, max(0.0, p[n] + step[n]))
-        trace.append({"obj": baseO, "balance": baseB, "phase": 1 if baseB < 0 else 2, "move": move})
-        if baseB >= 0 and move < tol:
+        move = max((abs(v) for v in step.values()), default=0.0)
+
+        # predicted vs actual improvement in the merit function
+        pred = (float(pulp.value(prob.objective) or 0.0)
+                + mu * violation(base_bal))              # model merit gain relative to d = 0
+        cand = {n: min(1.0, max(0.0, p[n] + step[n])) for n in plist}
+        new_obj, new_bal, _ = ev(cand)
+        actual = (new_obj - mu * violation(new_bal)) - (base_obj - mu * violation(base_bal))
+        rho = actual / pred if pred > 1e-12 else (1.0 if actual > 0 else -1.0)
+
+        accepted = rho >= eta_accept
+        if accepted:
+            p, base_obj, base_bal = cand, new_obj, new_bal
+        trace.append({"obj": base_obj, "balance": base_bal, "merit": base_obj - mu * violation(base_bal),
+                      "radius": radius, "rho": rho, "move": move, "accepted": accepted, "mu": mu})
+
+        if rho < 0.25:
+            radius *= 0.5
+        elif rho > eta_expand and move >= 0.9 * radius:
+            radius = min(delta_max, radius * 2.0)
+
+        if radius < delta_min or (accepted and move < tol and violation(base_bal) <= 1e-9):
             break
 
     fo, fb, feq = ev(p)
-    return {"settings": p, "obj": fo, "balance": fb, "trace": trace, "equilibrium": feq}
+    return {"settings": p, "obj": fo, "balance": fb, "trace": trace, "equilibrium": feq,
+            "feasible": violation(fb) <= 1e-9}
 
 
 __all__ = ["make_objective", "evaluate", "marginal_analysis", "rank_moves",
