@@ -352,3 +352,34 @@ effect formula that referenced one by name (`StateSchools`) failed to resolve an
 Restricting what may move is not the same as restricting what exists. Fixed in both `slp_optimize`
 and `gradient_optimize`; the parameter had never been exercised before this run.
 
+## There is no Laffer curve in the solver, and there should be
+
+Sweeping all 25 tax policies together from 0 to 1:
+
+```
+tax level    income      GDP   TaxEvasion   Unemployment
+     0.00        $0B   0.552        0.300          0.426
+     0.30     $2565B   0.589        0.407          0.346
+     0.60     $4428B   0.285        0.788          0.502
+     1.00     $6876B   0.000        1.000          0.681
+```
+
+Revenue rises **monotonically to $6,876Bn while GDP reaches 0.000**. You cannot collect $6.9 trillion
+from an economy that no longer exists, so this is a defect, not a finding about taxation.
+
+Cause: the same economy-blindness as on the cost side, and worse here.
+`AnchoredBudget.income(self, name, setting)` takes **no state argument**, so every tax already enacted
+in the save — the large ones — scales with the slider alone. At 100% taxation with GDP at zero,
+**$4,728Bn of the $6,876Bn comes from anchored taxes that never see the collapse**; only the $2,148Bn
+from CSV-estimated taxes responds at all.
+
+The mechanism is present in the shipped data and simply discarded. `IncomeTax` carries
+`GDP,0.5+(0.5*x);TaxEvasion,1.0-(0.2*x)` — a factor of 0.744 at a healthy economy against 0.400 at a
+dead one — and `notes/grammar.md` already states *"Higher rates raise TaxEvasion → diminishing revenue
+(built into the data)."*
+
+**Consequence, and it is a blocker rather than a blemish:** the solver currently cannot report that
+any configuration is unaffordable, because revenue is effectively unbounded. Every "can we fund this?"
+question returns yes. The fix and the plan that depends on it are in
+[`notes/private-provision-design.md`](private-provision-design.md).
+
