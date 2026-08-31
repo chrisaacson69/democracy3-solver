@@ -184,3 +184,38 @@ Winter Fuel Subsidy and Free School Meals are CSV-estimated. So the *saving* is 
 a solid number and a soft one — but the soft one would have to be underestimated by **more than 8×**
 before the conclusion reverses. The direction is robust even if the magnitude is not exact.
 
+### The same test on military spending — and why its headline number is overstated
+
+`--replace MilitarySpending --target jobs`:
+
+```
+cut Military Spending      frees $248Bn, costs 0.2673 of unemployment reduction
+RESULT   unemployment  0.3837 -> 0.3820   (101% recovered)
+         balance       -$97Bn -> +$797Bn  ($894Bn better)
+```
+
+The employment effect *is* fully replaceable, and **the entire replacement portfolio cost nothing** —
+every move the greedy took was revenue-neutral or revenue-raising (Import Tariffs, Gambling,
+Citizenship Tests, School Prayers, plus Sales Tax and Income Tax rises).
+
+**But $894Bn overstates the result, and the reason is a property of the search, not of the world.**
+Free moves always outrank paid ones, so once the greedy runs out of *good* free moves it keeps taking
+*trivial* ones — Income Tax to 0.49 raised **$288Bn for +0.0003** of unemployment. That is a revenue
+decision wearing a jobs move's clothes. Roughly $646Bn of the $894Bn is revenue the jobs target never
+required.
+
+The defensible claim is the narrower one: **the military's entire employment effect can be replaced
+without spending a dollar.** Not: the replacement earned $894Bn.
+
+Grounding is also weaker here than in the pensions case. The biggest single contributor is Import
+Tariffs (+0.0384 across three steps), which is **not enacted in the save** — a CSV estimate. Sales
+Tax, Income Tax and Citizenship Tests are grounded; Import Tariffs, Gambling, Internet Tax and School
+Prayers are not. So military spending being poor value for jobs is solid (that ranking is entirely
+grounded), but *this particular replacement portfolio* leans on estimated policies more than the
+pensions one did.
+
+**Method note on the greedy.** An earlier run recovered only 41% because every free win scored as
+infinite value, so ties broke arbitrarily and the move budget went on `+0.0000` gains. Free moves now
+rank by size among themselves, which took the same test from 41% to 101%. A ratio that divides by zero
+cannot order the things it returns infinity for — they need their own key.
+
