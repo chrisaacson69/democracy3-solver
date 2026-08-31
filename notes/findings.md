@@ -155,3 +155,32 @@ Two further limits worth stating. These rankings are **single-target by construc
 makes them legible, and it also means they say nothing about what a cut does to everything else (see
 the crises above). And *average* value assumes removing the whole programme, while *marginal* value
 measures a nudge from where it sits; they diverge wherever returns diminish, which is most places.
+
+### Replacement test: can you buy the same outcome cheaper?
+
+Ranking says pensions are poor value. The replacement test proves it constructively — zero the
+programme, then greedily buy the lost outcome back with whatever gives the most per dollar
+(`--replace StatePensions --target poverty`):
+
+```
+cut State Pensions          frees $215Bn, costs 0.1019 of poverty reduction
+buy back, best value first:
+  Rent Controls        0 -> 1.00     +0.0300 total, ~$1Bn
+  Food Stamps       0.82 -> 1.00     +0.0216      , ~$5Bn
+  Winter Fuel Subsidy  0 -> 0.15     +0.0090      , ~$6Bn
+  Free School Meals    0 -> 0.45     +0.0495      , ~$14Bn
+
+RESULT   poverty  0.2540 -> 0.2430   (111% recovered — better than the original)
+         balance  -$97Bn -> +$196Bn  ($293Bn better)
+```
+
+**State pensions are not the efficient way to buy less poverty: the same outcome — slightly better,
+in fact — is available for $293Bn less.** The whole replacement portfolio costs roughly $26Bn against
+the $215Bn it displaces.
+
+**How much of this survives the budget model's weak half?** The $215Bn freed is grounded (pensions are
+enacted in the save). Of the ~$26Bn replacement cost only Food Stamps is grounded; Rent Controls,
+Winter Fuel Subsidy and Free School Meals are CSV-estimated. So the *saving* is the difference between
+a solid number and a soft one — but the soft one would have to be underestimated by **more than 8×**
+before the conclusion reverses. The direction is robust even if the magnitude is not exact.
+
