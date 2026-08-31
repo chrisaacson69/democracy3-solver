@@ -7,7 +7,7 @@
   --paper:#E9EDF0; --card:#FBFCFD; --card-2:#F2F5F8;
   --ink:#101720; --ink-soft:#5A6672; --ink-faint:#8894A0;
   --rule:#C7D0D8; --rule-soft:#DDE4EA;
-  --accent:#1B4F8A; --accent-soft:#DCE7F3; --accent-ink:#12395F;
+  --accent:#1B4F8A; --accent-soft:#DCE7F3;
   --good:#26714F; --bad:#A8382C; --warn:#8A5F0F;
   --good-bg:#DFEDE6; --bad-bg:#F5E1DE; --warn-bg:#F3E9D5;
   --shadow:0 1px 0 rgba(16,23,32,.05), 0 2px 8px rgba(16,23,32,.05);
@@ -19,7 +19,7 @@
   --paper:#0E1419; --card:#151D24; --card-2:#1B242D;
   --ink:#E6EBEF; --ink-soft:#94A2AE; --ink-faint:#6E7D8A;
   --rule:#26323C; --rule-soft:#1F2A33;
-  --accent:#6BA3E0; --accent-soft:#17293D; --accent-ink:#9CC4EE;
+  --accent:#6BA3E0; --accent-soft:#17293D;
   --good:#57B98C; --bad:#E0776A; --warn:#D6A54A;
   --good-bg:#152A22; --bad-bg:#2E1A18; --warn-bg:#2B2415;
   --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 10px rgba(0,0,0,.28);
@@ -28,7 +28,7 @@
   --paper:#0E1419; --card:#151D24; --card-2:#1B242D;
   --ink:#E6EBEF; --ink-soft:#94A2AE; --ink-faint:#6E7D8A;
   --rule:#26323C; --rule-soft:#1F2A33;
-  --accent:#6BA3E0; --accent-soft:#17293D; --accent-ink:#9CC4EE;
+  --accent:#6BA3E0; --accent-soft:#17293D;
   --good:#57B98C; --bad:#E0776A; --warn:#D6A54A;
   --good-bg:#152A22; --bad-bg:#2E1A18; --warn-bg:#2B2415;
   --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 10px rgba(0,0,0,.28);
@@ -40,17 +40,28 @@ h1,h2,h3{margin:0;text-wrap:balance}
 button{font:inherit;color:inherit}
 .wrap{max-width:1340px;margin:0 auto;padding:0 20px}
 
-/* ---- masthead ---- */
 .masthead{border-bottom:2px solid var(--ink);background:var(--card);margin-bottom:18px}
 .mast-in{max-width:1340px;margin:0 auto;padding:18px 20px 0;
   display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between}
 .brand h1{font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:-.015em;line-height:1.05}
-.brand .sub{font-size:12px;color:var(--ink-soft);margin-top:5px;max-width:62ch}
+.brand .sub{font-size:12px;color:var(--ink-soft);margin-top:5px;max-width:64ch}
 .eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
   font-weight:600;margin-bottom:5px}
 .mast-tools{display:flex;gap:8px;align-items:center;padding-bottom:14px;flex-wrap:wrap}
 
-/* ---- readout strip ---- */
+/* scenario bar */
+.scenbar{max-width:1340px;margin:0 auto;padding:12px 20px 12px;border-top:1px solid var(--rule);
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.scenbar .lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+  font-weight:600;margin-right:2px}
+.scen{border:1px solid var(--rule);background:var(--card-2);border-radius:3px;padding:5px 11px;
+  font-size:12px;cursor:pointer;text-align:left;line-height:1.25}
+.scen:hover{border-color:var(--accent);color:var(--accent)}
+.scen.cur{background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:500}
+.scen small{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.abbar{margin-left:auto;font-size:11.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:center}
+.abbar b{color:var(--ink);font-weight:600}
+
 .strip{max-width:1340px;margin:0 auto;padding:0 20px;display:grid;
   grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:1px solid var(--rule)}
 .stat{padding:10px 14px 12px;border-right:1px solid var(--rule-soft)}
@@ -60,7 +71,6 @@ button{font:inherit;color:inherit}
   margin-top:3px;letter-spacing:-.02em}
 .stat .d{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
 
-/* ---- layout ---- */
 .cols{display:grid;grid-template-columns:minmax(320px,400px) 1fr;gap:18px;align-items:start}
 @media(max-width:900px){.cols{grid-template-columns:1fr}}
 .panel{background:var(--card);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow)}
@@ -73,20 +83,19 @@ button{font:inherit;color:inherit}
 .rail{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
 @media(max-width:900px){.rail{position:static;max-height:none}}
 
-/* ---- controls ---- */
 .eco{padding:12px 14px;border-bottom:1px solid var(--rule);background:var(--card-2)}
 .eco-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .eco-head b{font-size:12px;letter-spacing:.06em;text-transform:uppercase}
 .eco-val{font-family:var(--mono);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
 .eco-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--ink-faint);margin-top:2px}
 input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 0;cursor:pointer}
-input[type=search],input[type=text]{width:100%;padding:6px 9px;border:1px solid var(--rule);
+input[type=search]{width:100%;padding:6px 9px;border:1px solid var(--rule);
   border-radius:3px;background:var(--card);color:var(--ink);font:inherit;font-size:13px}
 .btn{border:1px solid var(--rule);background:var(--card);border-radius:3px;padding:5px 10px;
   font-size:12px;cursor:pointer;white-space:nowrap}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
-.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px}
 
 .dept{border-bottom:1px solid var(--rule-soft)}
 .dept>summary{padding:9px 14px;cursor:pointer;display:flex;justify-content:space-between;
@@ -98,8 +107,9 @@ input[type=search],input[type=text]{width:100%;padding:6px 9px;border:1px solid 
 .pol{padding:7px 14px 9px;border-top:1px solid var(--rule-soft)}
 .pol.off{opacity:.5}
 .pol-top{display:flex;align-items:center;gap:8px}
-.pol-name{flex:1;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  cursor:help}
+.pol-name{flex:1;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pol{cursor:pointer}
+.pol:hover .pol-name{color:var(--accent)}
 .pol-val{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--ink-soft);
   min-width:34px;text-align:right}
 .sw{width:26px;height:15px;border-radius:8px;border:1px solid var(--rule);background:var(--card-2);
@@ -107,10 +117,9 @@ input[type=search],input[type=text]{width:100%;padding:6px 9px;border:1px solid 
 .sw::after{content:"";position:absolute;top:1px;left:1px;width:11px;height:11px;border-radius:50%;
   background:var(--ink-faint);transition:transform .12s,background .12s}
 .sw[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
-.sw[aria-pressed="true"]::after{transform:translateX(11px);background:#fff}
+.sw[aria-pressed="true"]::after{transform:translateX(11px);background:var(--card)}
 .pol.chg .pol-name{font-weight:600;color:var(--accent)}
 
-/* ---- outcomes ---- */
 .zone{margin-bottom:2px}
 .zone-h{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
   font-weight:600;padding:12px 14px 5px;border-bottom:1px solid var(--rule-soft)}
@@ -128,7 +137,6 @@ input[type=search],input[type=text]{width:100%;padding:6px 9px;border:1px solid 
 .bar u{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--accent);opacity:.85}
 .up{color:var(--good)} .dn{color:var(--bad)} .flat{color:var(--ink-faint)}
 
-/* ---- chips ---- */
 .chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:11px;
   font-size:11.5px;border:1px solid var(--rule);background:var(--card-2);color:var(--ink-soft)}
@@ -139,15 +147,24 @@ input[type=search],input[type=text]{width:100%;padding:6px 9px;border:1px solid 
   background:var(--accent);color:var(--card);padding:1px 3px;border-radius:2px}
 .chip.gone{text-decoration:line-through;opacity:.55}
 
-/* ---- dilemmas ---- */
+/* edge-of-trigger table */
+.edge{display:grid;grid-template-columns:1fr 74px 96px 60px;gap:10px;align-items:center;
+  padding:5px 14px;border-bottom:1px solid var(--rule-soft);font-size:12.5px}
+.edge .st{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.edge .st.on{color:var(--bad)} .edge .st.on.good{color:var(--good)} .edge .st.off{color:var(--ink-faint)}
+.gap{height:6px;background:var(--card-2);border:1px solid var(--rule-soft);border-radius:2px;
+  position:relative;overflow:hidden}
+.gap i{position:absolute;top:0;bottom:0;right:0;background:var(--warn);border-radius:1px}
+.gap i.close{background:var(--bad)}
+
 .dil{padding:8px 14px;border-bottom:1px solid var(--rule-soft);display:grid;
   grid-template-columns:1fr 90px 56px;gap:10px;align-items:center}
 .dil .nm{font-size:12.5px}
 .dil .why{font-size:10.5px;color:var(--ink-faint);font-family:var(--mono)}
-.meter{height:6px;background:var(--card-2);border:1px solid var(--rule-soft);border-radius:2px;position:relative;overflow:hidden}
+.meter{height:6px;background:var(--card-2);border:1px solid var(--rule-soft);border-radius:2px;
+  position:relative;overflow:hidden}
 .meter i{position:absolute;inset:0 auto 0 0;background:var(--warn)}
 
-/* ---- why drawer ---- */
 .why-h{font-family:var(--serif);font-size:15px;font-weight:600}
 .why-sub{font-size:11.5px;color:var(--ink-soft);margin:3px 0 10px}
 .contrib{display:grid;grid-template-columns:1fr 96px 66px;gap:10px;align-items:center;
@@ -156,11 +173,23 @@ input[type=search],input[type=text]{width:100%;padding:6px 9px;border:1px solid 
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .contrib .v{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;text-align:right}
 .cbar{height:6px;position:relative;background:var(--card-2);border-radius:2px}
-.cbar i{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:1px}
+.cbar i{position:absolute;top:0;bottom:0;border-radius:1px}
 .empty{padding:16px 14px;color:var(--ink-faint);font-size:12.5px}
 .note{font-size:11.5px;color:var(--ink-soft);padding:10px 14px;border-top:1px solid var(--rule-soft);
   background:var(--card-2)}
 .note b{color:var(--ink)}
+
+/* sweep */
+.sweep-scale{display:grid;grid-template-columns:repeat(21,1fr);gap:1px;padding:0 14px;margin-top:8px}
+.sweep-scale i{height:26px;background:var(--good);border-radius:1px;align-self:end;display:block}
+.sweep-axis{display:flex;justify-content:space-between;padding:3px 14px 0;font-size:10px;
+  color:var(--ink-faint);font-family:var(--mono)}
+.ev{display:grid;grid-template-columns:60px 1fr 92px;gap:10px;align-items:center;
+  padding:5px 14px;border-bottom:1px solid var(--rule-soft);font-size:12.5px}
+.ev .lv{font-family:var(--mono);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.ev .tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;text-align:right}
+.ev .tag.starts{color:var(--bad)} .ev .tag.clears{color:var(--good)}
+.cur-mark{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:600}
 footer{max-width:1340px;margin:22px auto 0;padding:14px 20px 0;border-top:1px solid var(--rule);
   font-size:11.5px;color:var(--ink-faint);max-width:80ch}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -177,10 +206,10 @@ footer{max-width:1340px;margin:22px auto 0;padding:14px 20px 0;border-top:1px so
     </div>
     <div class="mast-tools">
       <button class="btn" id="pin">Pin as baseline</button>
-      <button class="btn" id="reset">Reset to US start</button>
       <button class="btn" id="theme" aria-label="Toggle colour theme">Theme</button>
     </div>
   </div>
+  <div class="scenbar" id="scenbar"></div>
   <div class="strip" id="strip"></div>
 </div>
 
@@ -194,12 +223,20 @@ footer{max-width:1340px;margin:22px auto 0;padding:14px 20px 0;border-top:1px so
       </div>
       <div class="pad" style="border-bottom:1px solid var(--rule)">
         <input type="search" id="find" placeholder="Filter policies&hellip;" aria-label="Filter policies">
+        <div style="font-size:11px;color:var(--ink-faint);margin-top:6px">
+          Drag to set a level, click the toggle to enact or repeal, click anywhere else on a row to <em>sweep</em> it.</div>
       </div>
       <div id="depts"></div>
     </div>
   </div>
 
   <div>
+    <div class="panel" id="sweepPanel" hidden>
+      <header><h2 id="sweepTitle">Sensitivity</h2>
+        <button class="btn" id="sweepClose">Close</button></header>
+      <div id="sweepBody"></div>
+    </div>
+
     <div class="panel">
       <header>
         <h2>Outcomes at equilibrium</h2>
@@ -221,10 +258,13 @@ footer{max-width:1340px;margin:22px auto 0;padding:14px 20px 0;border-top:1px so
     <div class="panel">
       <header><h2>Crises</h2><span class="hint" id="critCount"></span></header>
       <div class="chips" id="sits"></div>
+      <div class="zone-h">Closest to flipping</div>
+      <div id="edges"></div>
       <div class="note"><b>Hysteresis, not a line.</b> A crisis switches on above its start trigger and
       only switches off below a <em>lower</em> stop trigger. Between the two both states are
       self&#8209;consistent, so the same country can sit in a good or a bad basin on identical policy.
-      That gap is why escaping one is harder than avoiding it.</div>
+      That gap is why a crisis is so much cheaper to cause than to clear &mdash; and why the headroom
+      column above is worth watching before it reaches zero.</div>
     </div>
 
     <div class="panel">
@@ -241,8 +281,9 @@ footer{max-width:1340px;margin:22px auto 0;padding:14px 20px 0;border-top:1px so
 <footer>
   Model parsed from the simulation CSVs shipped with Democracy 3 (Positech Games) &mdash; 97 nodes,
   1,149 effect edges, 123 policies, 36 crises, 54 dilemmas. The equilibrium here is the same fixed point
-  the project's Python solver computes, run in the browser. Six sources the network references but never
-  defines (<span style="font-family:var(--mono)">_effectivedebt_</span>,
+  the project's Python solver computes, run in the browser; the two agree to 4&times;10<sup>&minus;16</sup>.
+  Six sources the network references but never defines
+  (<span style="font-family:var(--mono)">_effectivedebt_</span>,
   <span style="font-family:var(--mono)">_global_interest_rates_</span>, the
   <span style="font-family:var(--mono)">*_perc</span> membership values) resolve to zero, exactly as in
   the solver &mdash; so debt and interest feedback are absent here too.
@@ -253,10 +294,8 @@ footer{max-width:1340px;margin:22px auto 0;padding:14px 20px 0;border-top:1px so
 (function(){
 "use strict";
 const M = JSON.parse(document.getElementById("model").textContent);
-const NODES = M.nodes, EDGES = M.edges, POLS = M.policies;
-const CONST = "_default_";
+const NODES = M.nodes, EDGES = M.edges, POLS = M.policies, CONST = "_default_";
 
-/* ---------- formula evaluator: walks the AST exported by the Python parser ---------- */
 function ev(n, x, S){
   if (typeof n === "number") return n;
   if (n === "x") return x;
@@ -272,7 +311,6 @@ function ev(n, x, S){
   return 0;
 }
 
-/* ---------- incoming index + node metadata (mirrors network.py / solver.py) ---------- */
 const INC = {};
 for (const e of EDGES){ (INC[e.t] || (INC[e.t] = [])).push(e); }
 const META = {}, SITS = [];
@@ -285,13 +323,10 @@ const isSit = {}; for (const s of SITS) isSit[s] = 1;
 const clamp = (v,lo,hi) => v < lo ? lo : v > hi ? hi : v;
 
 function solve(policies, economy){
-  const fixed = Object.assign({}, M.exogenous, policies);
-  fixed["_globaleconomy_"] = economy;
-  fixed[CONST] = 0;
-  const S = Object.assign({}, fixed);
+  const S = Object.assign({}, M.exogenous, policies);
+  S["_globaleconomy_"] = economy; S[CONST] = 0;
   for (const k in META) S[k] = clamp(META[k][0], META[k][1], META[k][2]);
   const act = {}; for (const s of SITS) act[s] = !!M.situationsActive[s];
-
   let it = 0, delta = 0;
   for (it = 1; it <= 600; it++){
     for (const s of SITS){
@@ -301,8 +336,7 @@ function solve(policies, economy){
     }
     const next = {};
     for (const k in META){
-      const m = META[k]; let t = m[0];
-      const es = INC[k];
+      const m = META[k]; let t = m[0]; const es = INC[k];
       if (es) for (let i=0;i<es.length;i++){
         const e = es[i];
         if (isSit[e.s] && !act[e.s]) continue;
@@ -321,7 +355,6 @@ function solve(policies, economy){
   return {S:S, active:act, iters:it, delta:delta};
 }
 
-/* contributions into one node at a settled state — the "why" */
 function contributions(node, R){
   const out = [], es = INC[node] || [];
   for (const e of es){
@@ -333,31 +366,62 @@ function contributions(node, R){
   return out;
 }
 
+const stateDilemmas = M.dilemmas.filter(d=>d.influences.length);
+function dilemmaPressure(R){
+  return stateDilemmas.map(d=>{
+    let s = 0; const parts = [];
+    for (const inf of d.influences){
+      const xv = inf.source === CONST ? 0 : R.S[inf.source];
+      s += ev(inf.ast, xv === undefined ? 0 : xv, R.S);
+      if (inf.source !== CONST) parts.push(inf.source);
+    }
+    return {d:d, s:s, parts:parts};
+  });
+}
+
 /* ---------- state ---------- */
 const start = {}; for (const k in POLS) start[k] = POLS[k].start;
+const SCENARIOS = M.scenarios && M.scenarios.length ? M.scenarios
+  : [{id:"us_start", label:"United States, as played", note:"", policies:start, objective:null}];
 let cur = Object.assign({}, start);
+let curName = SCENARIOS[0].label;
 let economy = M.meta.economy_default != null ? M.meta.economy_default : 0.5;
-let baseline = null, selected = null;
-const offVal = {};   // remembers a policy's level while it is switched off
+let baseline = null, baseName = "—", selected = null, sweepKey = null;
+const offVal = {};
 
-const fmt = (v,d)=> (v>=0?"":"") + v.toFixed(d===undefined?3:d);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,
+  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const sign = v => (v>0?"+":"") + v.toFixed(3);
 
-/* ---------- render: controls ---------- */
+/* ---------- scenario bar ---------- */
+function renderScenBar(){
+  const btns = SCENARIOS.map(s=>{
+    const on = s.label === curName;
+    const kind = s.objective ? "optimised" : "as played";
+    return '<button class="scen'+(on?" cur":"")+'" data-s="'+esc(s.id)+'" title="'+esc(s.note||"")+'">'
+      + '<small>'+kind+'</small>' + esc(s.label) + '</button>';
+  }).join("");
+  document.getElementById("scenbar").innerHTML =
+    '<span class="lbl">Scenario</span>' + btns
+    + '<span class="abbar"><span>B (showing) <b>'+esc(curName)+'</b></span>'
+    + '<span>vs A (baseline) <b>'+esc(baseName)+'</b></span></span>';
+}
+
+/* ---------- controls ---------- */
 const deptOrder = ["TAX","ECONOMY","WELFARE","PUBLICSERVICES","LAWANDORDER","TRANSPORT","FOREIGNPOLICY"];
 const deptName = {TAX:"Tax", ECONOMY:"Economy", WELFARE:"Welfare", PUBLICSERVICES:"Public services",
   LAWANDORDER:"Law and order", TRANSPORT:"Transport", FOREIGNPOLICY:"Foreign policy", Other:"Other"};
 const byDept = {};
 for (const k in POLS){ const d = POLS[k].dept; (byDept[d]||(byDept[d]=[])).push(k); }
 for (const d in byDept) byDept[d].sort((a,b)=>POLS[a].gui.localeCompare(POLS[b].gui));
-
 const deptsEl = document.getElementById("depts");
+
 function buildControls(){
   const order = deptOrder.filter(d=>byDept[d]).concat(Object.keys(byDept).filter(d=>deptOrder.indexOf(d)<0));
   deptsEl.innerHTML = order.map(d=>{
     const rows = byDept[d].map(k=>{
       const p = POLS[k];
-      return '<div class="pol" data-p="'+k+'" data-name="'+p.gui.toLowerCase()+'">'
+      return '<div class="pol" data-p="'+k+'" data-name="'+esc(p.gui.toLowerCase())+'">'
         + '<div class="pol-top">'
         +   '<button class="sw" data-sw="'+k+'" aria-pressed="false" aria-label="Enact '+esc(p.gui)+'"></button>'
         +   '<span class="pol-name" title="'+esc(p.desc||p.gui)+'">'+esc(p.gui)+'</span>'
@@ -371,40 +435,39 @@ function buildControls(){
       + rows + '</details>';
   }).join("");
 }
-function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-
 function syncControls(){
   for (const k in POLS){
     const v = cur[k], on = v > 1e-9;
     const row = deptsEl.querySelector('[data-p="'+k+'"]'); if (!row) continue;
     row.classList.toggle("off", !on);
-    row.classList.toggle("chg", Math.abs(v - start[k]) > 1e-6);
+    row.classList.toggle("chg", baseline ? Math.abs(v - (baseline.pol[k]||0)) > 1e-6 : false);
     row.querySelector('[data-sw="'+k+'"]').setAttribute("aria-pressed", on ? "true":"false");
     row.querySelector('[data-v="'+k+'"]').textContent = v.toFixed(2);
     const r = row.querySelector('[data-r="'+k+'"]'); if (r.value != v) r.value = v;
   }
 }
 
-/* ---------- render: outcomes ---------- */
+/* ---------- outcomes ---------- */
 const zoneName = {ECONOMY:"Economy", WELFARE:"Welfare", PUBLICSERVICES:"Public services",
   LAWANDORDER:"Law and order", TRANSPORT:"Transport", FOREIGNPOLICY:"Foreign policy", HIDDEN:"Hidden"};
-const simKeys = Object.keys(NODES).filter(k=>NODES[k].kind==="sim");
 const zones = {};
-for (const k of simKeys){ const z = NODES[k].zone||"Other"; (zones[z]||(zones[z]=[])).push(k); }
+for (const k of Object.keys(NODES).filter(k=>NODES[k].kind==="sim")){
+  const z = NODES[k].zone||"Other"; (zones[z]||(zones[z]=[])).push(k);
+}
 for (const z in zones) zones[z].sort((a,b)=>NODES[a].gui.localeCompare(NODES[b].gui));
 
 function renderOutcomes(R){
   const base = baseline ? baseline.S : null;
-  const html = Object.keys(zones).sort().map(z=>{
+  document.getElementById("outcomes").innerHTML = Object.keys(zones).sort().map(z=>{
     const rows = zones[z].map(k=>{
       const n = NODES[k], v = R.S[k], span = (n.max-n.min)||1;
       const pct = Math.max(0,Math.min(100, 100*(v-n.min)/span));
       const d = base ? v - base[k] : 0;
       let cls = "flat", arrow = "";
       if (base && Math.abs(d) > 5e-4){
-        if (n.emotion === "HIGHGOOD"){ cls = d>0?"up":"dn"; }
-        else if (n.emotion === "HIGHBAD"){ cls = d>0?"dn":"up"; }
-        arrow = (d>0?"▲":"▼");
+        if (n.emotion === "HIGHGOOD") cls = d>0?"up":"dn";
+        else if (n.emotion === "HIGHBAD") cls = d>0?"dn":"up";
+        arrow = d>0 ? "▲" : "▼";
       }
       const fill = n.emotion==="HIGHGOOD" ? "g" : n.emotion==="HIGHBAD" ? "b" : "";
       const mark = base ? '<u style="left:'+Math.max(0,Math.min(100,100*(base[k]-n.min)/span))+'%"></u>' : "";
@@ -417,10 +480,13 @@ function renderOutcomes(R){
     }).join("");
     return '<div class="zone"><div class="zone-h">'+esc(zoneName[z]||z)+'</div>'+rows+'</div>';
   }).join("");
-  document.getElementById("outcomes").innerHTML = html;
 }
 
-/* ---------- render: crises ---------- */
+/* ---------- crises + proximity ---------- */
+function headroom(k, R){
+  const n = NODES[k], v = R.S[k];
+  return R.active[k] ? {gap: v - n.stop, dir:"clears"} : {gap: n.start - v, dir:"starts"};
+}
 function renderSits(R){
   const base = baseline ? baseline.active : null;
   const items = SITS.slice().sort((a,b)=>{
@@ -428,73 +494,152 @@ function renderSits(R){
     return av-bv || NODES[a].gui.localeCompare(NODES[b].gui);
   });
   let onCount = 0, badCount = 0;
-  const html = items.map(k=>{
+  document.getElementById("sits").innerHTML = items.map(k=>{
     const n = NODES[k], on = R.active[k];
     if (on){ onCount++; if (!n.positive) badCount++; }
     const changed = base ? (on !== !!base[k]) : false;
     let cls = "chip";
     if (on) cls += n.positive ? " on-good" : " on-bad";
-    if (changed && on) cls += " new";
-    if (changed && !on) cls += " gone";
+    if (changed) cls += on ? " new" : " gone";
     return '<span class="'+cls+'" title="'+esc(n.gui)+' — value '+R.S[k].toFixed(3)
       + ', starts above '+n.start+', stops below '+n.stop+'">'
       + esc(n.gui) + '<span class="pc">'+R.S[k].toFixed(2)+'</span></span>';
   }).join("");
-  document.getElementById("sits").innerHTML = html;
   document.getElementById("critCount").textContent = onCount + " active · " + badCount + " harmful";
+
+  const edges = SITS.map(k=>({k:k, h:headroom(k,R), on:R.active[k]}))
+    .sort((a,b)=>a.h.gap - b.h.gap).slice(0,8);
+  const worst = Math.max(...edges.map(e=>Math.abs(e.h.gap)), 0.01);
+  document.getElementById("edges").innerHTML = edges.map(e=>{
+    const n = NODES[e.k], close = e.h.gap < 0.08;
+    return '<div class="edge"><span class="nm">'+esc(n.gui)+'</span>'
+      + '<span class="st '+(e.on?"on":"off")+(e.on&&n.positive?" good":"")+'">'
+      +   (e.on?"active":"dormant")+'</span>'
+      + '<span class="gap"><i class="'+(close?"close":"")+'" style="width:'
+      +   Math.max(2,Math.min(100,100*Math.abs(e.h.gap)/worst))+'%"></i></span>'
+      + '<span class="num" style="font-family:var(--mono);font-size:11px;text-align:right">'
+      +   e.h.gap.toFixed(3)+'</span></div>';
+  }).join("")
+  + '<div class="empty" style="padding:7px 14px;font-size:11px">Headroom is the distance left before '
+  + 'each flips &mdash; a dormant crisis to its start trigger, an active one down to its stop trigger.</div>';
 }
 
-/* ---------- render: dilemma pressure ---------- */
-const stateDilemmas = M.dilemmas.filter(d=>d.influences.length);
+/* ---------- dilemmas ---------- */
 function renderDilemmas(R){
-  const scored = stateDilemmas.map(d=>{
-    let s = 0; const parts = [];
-    for (const inf of d.influences){
-      const xv = inf.source === CONST ? 0 : R.S[inf.source];
-      const v = ev(inf.ast, xv === undefined ? 0 : xv, R.S);
-      s += v; if (inf.source !== CONST) parts.push(inf.source);
-    }
-    return {d:d, s:s, parts:parts};
-  }).sort((a,b)=>b.s-a.s);
-  const top = Math.max(...scored.map(x=>Math.abs(x.s)), 1);
-  document.getElementById("dils").innerHTML = scored.map(x=>
-    '<div class="dil"><div><div class="nm" title="'+esc(x.d.description)+'">'+esc(x.d.guiname)+'</div>'
-    + '<div class="why">'+esc(x.parts.join(", ")||"constant")+'</div></div>'
-    + '<span class="meter"><i style="width:'+Math.max(0,Math.min(100,100*x.s/top))+'%"></i></span>'
-    + '<span class="num" style="font-family:var(--mono);font-size:11.5px;text-align:right">'+x.s.toFixed(2)+'</span>'
-    + '</div>').join("");
+  const scored = dilemmaPressure(R).sort((a,b)=>b.s-a.s);
+  const basePress = baseline ? baseline.press : null;
+  const top = Math.max.apply(null, scored.map(x=>Math.abs(x.s)).concat([1]));
+  document.getElementById("dils").innerHTML = scored.map(x=>{
+    const bp = basePress ? basePress[x.d.name] : undefined;
+    const d = bp === undefined ? null : x.s - bp;
+    return '<div class="dil"><div><div class="nm" title="'+esc(x.d.description)+'">'
+      + esc(x.d.guiname)+'</div><div class="why">'+esc(x.parts.join(", ")||"constant")+'</div></div>'
+      + '<span class="meter"><i style="width:'+Math.max(0,Math.min(100,100*x.s/top))+'%"></i></span>'
+      + '<span class="num" style="font-family:var(--mono);font-size:11.5px;text-align:right">'
+      + x.s.toFixed(2) + (d!==null && Math.abs(d)>0.005
+          ? '<br><span style="font-size:9.5px" class="'+(d>0?"dn":"up")+'">'+sign(d).slice(0,5)+'</span>' : "")
+      + '</span></div>';
+  }).join("");
 }
 
-/* ---------- render: strip + why ---------- */
+/* ---------- sweep: the breakpoint finder ---------- */
+const SWEEP_N = 21;
+function runSweep(key){
+  const pts = [], saved = cur[key];
+  for (let i=0;i<SWEEP_N;i++){
+    const lv = i/(SWEEP_N-1);
+    const p = Object.assign({}, cur); p[key] = lv;
+    const R = solve(p, economy);
+    const press = {}; for (const x of dilemmaPressure(R)) press[x.d.name] = x.s;
+    pts.push({lv:lv, R:R, press:press, nBad:SITS.filter(s=>R.active[s] && !NODES[s].positive).length});
+  }
+  cur[key] = saved;
+  return pts;
+}
+function renderSweep(key){
+  const p = POLS[key];
+  document.getElementById("sweepPanel").hidden = false;
+  document.getElementById("sweepTitle").textContent = "Sensitivity — " + p.gui;
+  const pts = runSweep(key);
+
+  // crisis flip events between consecutive levels
+  const events = [];
+  for (let i=1;i<pts.length;i++){
+    for (const s of SITS){
+      const a = pts[i-1].R.active[s], b = pts[i].R.active[s];
+      if (a !== b) events.push({lv:pts[i].lv, s:s, starts:b});
+    }
+  }
+  // biggest dilemma pressure movement across the whole sweep
+  const moves = stateDilemmas.map(d=>{
+    const vals = pts.map(pt=>pt.press[d.name]);
+    return {d:d, lo:Math.min.apply(null,vals), hi:Math.max.apply(null,vals),
+            span:Math.max.apply(null,vals)-Math.min.apply(null,vals)};
+  }).filter(m=>m.span > 0.01).sort((a,b)=>b.span-a.span).slice(0,6);
+
+  const maxBad = Math.max.apply(null, pts.map(x=>x.nBad).concat([1]));
+  const curLv = cur[key];
+  const bars = pts.map(pt=>{
+    const h = 4 + 22*pt.nBad/maxBad;
+    const near = Math.abs(pt.lv - curLv) < 0.5/(SWEEP_N-1);
+    return '<i style="height:'+h+'px;background:'+(near?"var(--accent)":"var(--bad)")
+      + '" title="level '+pt.lv.toFixed(2)+' — '+pt.nBad+' harmful crises"></i>';
+  }).join("");
+
+  const evHtml = events.length ? events.map(e=>
+    '<div class="ev"><span class="lv">'+e.lv.toFixed(2)+'</span>'
+    + '<span>'+esc(NODES[e.s].gui)+'</span>'
+    + '<span class="tag '+(e.starts?"starts":"clears")+'">'
+    +   (e.starts ? "starts" : "clears")+'</span></div>').join("")
+    : '<div class="empty">No crisis changes state anywhere across this policy’s range. '
+      + 'Whatever this lever does, it does not flip a basin on its own.</div>';
+
+  const movHtml = moves.length ? moves.map(m=>
+    '<div class="ev"><span class="lv" style="font-size:11px">'+m.lo.toFixed(2)+'–'+m.hi.toFixed(2)+'</span>'
+    + '<span>'+esc(m.d.guiname)+'</span>'
+    + '<span class="tag" style="color:var(--warn)">±'+m.span.toFixed(2)+'</span></div>').join("")
+    : '<div class="empty">No state-driven dilemma responds measurably to this policy.</div>';
+
+  document.getElementById("sweepBody").innerHTML =
+    '<div class="note" style="border-top:0">Sweeping <b>'+esc(p.gui)+'</b> from 0 to 1 with everything '
+    + 'else held where you have it, re-solving the whole network at each of 21 levels. Bars are the count '
+    + 'of <em>harmful</em> crises active; the blue bar is where the slider sits now ('
+    + '<span class="cur-mark">'+curLv.toFixed(2)+'</span>).</div>'
+    + '<div class="sweep-scale">'+bars+'</div>'
+    + '<div class="sweep-axis"><span>0.00</span><span>0.50</span><span>1.00</span></div>'
+    + '<div class="zone-h">Crisis thresholds</div>' + evHtml
+    + '<div class="zone-h">Dilemma pressure range across the sweep</div>' + movHtml;
+}
+
+/* ---------- strip + why ---------- */
+function delta(k, R){
+  if (!baseline) return "–";
+  const d = R.S[k] - baseline.S[k];
+  return Math.abs(d) < 5e-4 ? "no change" : (d>0?"+":"") + d.toFixed(3) + " vs A";
+}
 function renderStrip(R){
+  const nBad = SITS.filter(s=>R.active[s] && !NODES[s].positive).length;
+  const bBad = baseline ? SITS.filter(s=>baseline.active[s] && !NODES[s].positive).length : null;
   const items = [
-    ["Iterations to settle", String(R.iters), R.delta < 1e-6 ? "converged" : "did not settle"],
+    ["Settled in", R.iters + " iters", R.delta < 1e-6 ? "converged" : "did not settle"],
     ["GDP", R.S["GDP"].toFixed(3), delta("GDP", R)],
     ["Unemployment", R.S["Unemployment"].toFixed(3), delta("Unemployment", R)],
     ["Crime", R.S["CrimeRate"].toFixed(3), delta("CrimeRate", R)],
     ["Health", R.S["Health"].toFixed(3), delta("Health", R)],
     ["Equality", R.S["Equality"].toFixed(3), delta("Equality", R)],
-    ["Active crises", String(SITS.filter(s=>R.active[s]).length), baseline
-      ? (SITS.filter(s=>R.active[s]).length - SITS.filter(s=>baseline.active[s]).length >= 0 ? "+" : "")
-        + (SITS.filter(s=>R.active[s]).length - SITS.filter(s=>baseline.active[s]).length) + " vs baseline"
-      : "–"]
+    ["Harmful crises", String(nBad),
+      bBad === null ? "–" : (nBad-bBad>=0?"+":"") + (nBad-bBad) + " vs A"]
   ];
   document.getElementById("strip").innerHTML = items.map(i=>
     '<div class="stat"><div class="k">'+esc(i[0])+'</div><div class="v">'+esc(i[1])+'</div>'
     + '<div class="d">'+esc(i[2])+'</div></div>').join("");
 }
-function delta(k, R){
-  if (!baseline) return "–";
-  const d = R.S[k] - baseline.S[k];
-  return (Math.abs(d) < 5e-4) ? "no change" : (d>0?"+":"") + d.toFixed(3) + " vs baseline";
-}
-
 function renderWhy(R){
   const p = document.getElementById("whyPanel");
   if (!selected){ p.hidden = true; return; }
   p.hidden = false;
   const n = NODES[selected], cs = contributions(selected, R);
-  const top = Math.max(...cs.map(c=>Math.abs(c.v)), 1e-6);
+  const top = Math.max.apply(null, cs.map(c=>Math.abs(c.v)).concat([1e-6]));
   const rows = cs.slice(0,14).map(c=>{
     const src = NODES[c.src] ? NODES[c.src].gui : (POLS[c.src] ? POLS[c.src].gui : c.src);
     const w = 100*Math.abs(c.v)/top, pos = c.v >= 0;
@@ -505,11 +650,10 @@ function renderWhy(R){
   }).join("");
   const sum = cs.reduce((a,c)=>a+c.v,0);
   document.getElementById("why").innerHTML =
-    '<div class="why-h">'+esc(n.gui)+'</div>'
-    + '<div class="why-sub">'+esc(n.desc||"")+'</div>'
+    '<div class="why-h">'+esc(n.gui)+'</div><div class="why-sub">'+esc(n.desc||"")+'</div>'
     + '<div class="contrib" style="border-bottom-width:2px;font-weight:600">'
     +   '<div>Base value '+n.def.toFixed(3)+' + '+cs.length+' live inputs</div>'
-    +   '<span></span><span class="v">'+ (n.def+sum).toFixed(3) +'</span></div>'
+    +   '<span></span><span class="v">'+(n.def+sum).toFixed(3)+'</span></div>'
     + rows
     + (cs.length>14 ? '<div class="empty">'+(cs.length-14)+' smaller inputs not shown</div>' : "")
     + (Math.abs(n.def+sum - R.S[selected])>1e-3
@@ -525,34 +669,70 @@ function refresh(){
   requestAnimationFrame(()=>{
     pending = false;
     const R = solve(cur, economy);
-    renderStrip(R); renderOutcomes(R); renderSits(R); renderDilemmas(R); renderWhy(R);
-    window.__R = R;
+    renderScenBar(); renderStrip(R); renderOutcomes(R); renderSits(R);
+    renderDilemmas(R); renderWhy(R);
   });
 }
+function pinCurrent(){
+  const R = solve(cur, economy);
+  const press = {}; for (const x of dilemmaPressure(R)) press[x.d.name] = x.s;
+  baseline = {S:R.S, active:R.active, press:press, pol:Object.assign({}, cur)};
+  baseName = curName;
+}
+function loadScenario(id){
+  const s = SCENARIOS.filter(x=>x.id===id)[0]; if (!s) return;
+  cur = Object.assign({}, start, s.policies);
+  curName = s.label;
+  syncControls();
+  if (sweepKey) renderSweep(sweepKey);
+  refresh();
+}
 
-buildControls(); syncControls();
+buildControls();
 document.getElementById("eco").value = economy;
 document.getElementById("ecoV").textContent = economy.toFixed(2);
 
 deptsEl.addEventListener("input", e=>{
   const k = e.target.getAttribute("data-r"); if (!k) return;
   cur[k] = parseFloat(e.target.value);
+  curName = "Custom";
   const row = e.target.closest(".pol");
   row.querySelector('[data-v="'+k+'"]').textContent = cur[k].toFixed(2);
   row.classList.toggle("off", !(cur[k] > 1e-9));
-  row.classList.toggle("chg", Math.abs(cur[k]-start[k]) > 1e-6);
   row.querySelector('[data-sw="'+k+'"]').setAttribute("aria-pressed", cur[k] > 1e-9 ? "true":"false");
   refresh();
 });
 deptsEl.addEventListener("click", e=>{
-  const k = e.target.getAttribute && e.target.getAttribute("data-sw"); if (!k) return;
-  if (cur[k] > 1e-9){ offVal[k] = cur[k]; cur[k] = 0; }
-  else { cur[k] = offVal[k] || start[k] || 0.5; }
-  syncControls(); refresh();
+  // closest(), not e.target: the click may land on a descendant or on row whitespace, and the
+  // sweep target is the whole row rather than just the label — a bigger target for a slower action.
+  const swEl = e.target.closest("[data-sw]");
+  if (swEl){
+    const sw = swEl.getAttribute("data-sw");
+    if (cur[sw] > 1e-9){ offVal[sw] = cur[sw]; cur[sw] = 0; }
+    else { cur[sw] = offVal[sw] || start[sw] || 0.5; }
+    curName = "Custom"; syncControls();
+    if (sweepKey) renderSweep(sweepKey);
+    refresh(); return;
+  }
+  if (e.target.matches("input[type=range]")) return;   // that is a level change, not a sweep request
+  const row = e.target.closest(".pol");
+  if (row){
+    sweepKey = row.getAttribute("data-p");
+    renderSweep(sweepKey);
+    document.getElementById("sweepPanel").scrollIntoView({behavior:"smooth", block:"start"});
+  }
+});
+document.getElementById("sweepClose").addEventListener("click", ()=>{
+  sweepKey = null; document.getElementById("sweepPanel").hidden = true;
+});
+document.getElementById("scenbar").addEventListener("click", e=>{
+  const id = e.target.closest("[data-s]"); if (!id) return;
+  loadScenario(id.getAttribute("data-s"));
 });
 document.getElementById("eco").addEventListener("input", e=>{
   economy = parseFloat(e.target.value);
   document.getElementById("ecoV").textContent = economy.toFixed(2);
+  if (sweepKey) renderSweep(sweepKey);
   refresh();
 });
 document.getElementById("find").addEventListener("input", e=>{
@@ -567,7 +747,6 @@ document.getElementById("outcomes").addEventListener("click", e=>{
   const k = row.getAttribute("data-n");
   selected = (selected === k) ? null : k;
   refresh();
-  if (selected) document.getElementById("whyPanel").scrollIntoView({behavior:"smooth", block:"nearest"});
 });
 document.getElementById("outcomes").addEventListener("keydown", e=>{
   if (e.key !== "Enter" && e.key !== " ") return;
@@ -575,26 +754,21 @@ document.getElementById("outcomes").addEventListener("keydown", e=>{
   e.preventDefault(); row.click();
 });
 document.getElementById("pin").addEventListener("click", ()=>{
-  baseline = solve(cur, economy);
-  document.getElementById("pin").textContent = "Baseline pinned ✓";
-  setTimeout(()=>{document.getElementById("pin").textContent = "Pin as baseline";}, 1400);
-  refresh();
-});
-document.getElementById("reset").addEventListener("click", ()=>{
-  cur = Object.assign({}, start); economy = 0.5;
-  document.getElementById("eco").value = 0.5;
-  document.getElementById("ecoV").textContent = "0.50";
+  pinCurrent();
+  const b = document.getElementById("pin");
+  b.textContent = "Baseline pinned ✓";
+  setTimeout(()=>{ b.textContent = "Pin as baseline"; }, 1400);
   syncControls(); refresh();
 });
 const root = document.documentElement;
 document.getElementById("theme").addEventListener("click", ()=>{
   const now = root.getAttribute("data-theme");
-  const dark = now ? now === "dark"
-    : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const dark = now ? now === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
   root.setAttribute("data-theme", dark ? "light" : "dark");
 });
 
-baseline = solve(cur, economy);   // the US start is the default comparison point
+pinCurrent();          // the US start is A until you pin something else
+syncControls();
 refresh();
 })();
 </script>

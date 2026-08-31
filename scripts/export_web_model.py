@@ -170,6 +170,11 @@ def main() -> None:
 
     dilemmas = parse_dilemmas(Path(d) / "dilemmas")
 
+    # Optimiser-derived scenarios, if they have been computed (scripts/export_scenarios.py).
+    # Optional on purpose: the page is useful without them, and recomputing them is minutes of work.
+    scen_file = Path("web/scenarios.json")
+    scenarios = json.loads(scen_file.read_text(encoding="utf-8")) if scen_file.exists() else []
+
     payload = {
         "meta": {
             "source": "Democracy 3 (Positech Games) shipped simulation CSVs, parsed by d3solver",
@@ -183,13 +188,14 @@ def main() -> None:
         "situationsActive": scen.ref_active,
         "refState": scen.ref_state,
         "dilemmas": dilemmas,
+        "scenarios": scenarios,
         "problems": problems + [list(p) for p in model.problems],
     }
     out = Path(args.out)
     out.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
     print(f"{model.summary()}")
     print(f"nodes={len(nodes)} edges={len(edges)} policies={len(policies)} "
-          f"dilemmas={len(dilemmas)} ast-problems={len(problems)}")
+          f"dilemmas={len(dilemmas)} scenarios={len(scenarios)} ast-problems={len(problems)}")
     print(f"wrote {out}  ({out.stat().st_size/1024:.0f} KB)")
 
 
