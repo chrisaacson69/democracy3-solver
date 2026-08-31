@@ -25,6 +25,7 @@ from d3solver.config import sim_dir
 from d3solver.milp import refine_milp
 from d3solver.optimize import evaluate, make_objective
 from d3solver.savegame import load_savegame
+from d3solver.scenario import from_savegame
 
 SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
 WEIGHTS = {"Equality": 1.0, "Health": 1.0, "GDP": 1.0,
@@ -49,12 +50,8 @@ def main() -> None:
     ref_state = dict(save.sim_values)
     ref_state.update({n: (d["val"] if d["active"] else 0.0) for n, d in save.situations.items()})
     ref_active = {n: bool(d["active"]) for n, d in save.situations.items()}
-    exo = {
-        "_global_socialism": save.globals.get("socialism", 0.5),
-        "_global_liberalism": save.globals.get("liberalism", 0.5),
-        "_globaleconomy_": save.globals.get("globaleconomy_pos", 0.5),
-        "_year": save.globals.get("globaleconomy_years", 0.0),
-    }
+    scen = from_savegame(save)          # economy at its long-run average (notes/scope.md)
+    exo = scen.exogenous
     ab = anchored_from_save(save, INCOME_TARGET, EXPENDITURE_TARGET)
     csv = calibrate(model, cur, dict(save.sim_values), INCOME_TARGET, EXPENDITURE_TARGET)
     obj = make_objective(WEIGHTS)

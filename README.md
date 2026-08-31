@@ -60,6 +60,11 @@ the tractable approximations; the simulator keeps them honest.
       `data/simconfig.txt` (interest rates, credit ratings, `DEBT_TO_GDP_MAX`) and `data/missions/*/`
       (per-country income bands, GDP range, population, starting debt) are shipped, grounded, and not
       yet read by the loader.
+- [ ] **Make the budget's economy sensitivity uniform.** `AnchoredBudget.cost` takes no state argument,
+      so the 46 policies enacted in the save are economy-blind while the 77 CSV-estimated ones carry the
+      GDP multipliers — 7 policies have a declared GDP multiplier silently discarded. Because of this the
+      savings-buffer assumption in `notes/scope.md` is **not measurable**: sweeping the status-quo vector
+      across the whole economic cycle gives a perfectly flat balance (`scripts/economy_sweep.py`).
 
 ## Setup
 
@@ -80,6 +85,7 @@ src/d3solver/
   model.py     typed model (SimValue, Policy, VoterType, Situation, Effect, GameModel)
   loader.py    CSV loaders; collects parse problems, never fabricates
   config.py    resolve the data dir (env or config.toml)
+  scenario.py  exogenous inputs; economy defaults to its long-run average, and sweeps
   network.py   reverse adjacency: target -> incoming edges
   savegame.py  autosave.xml parser (policy settings, sim values, situation flags)
   solver.py    Layer 1 — the iterative equilibrium fixed point (the oracle)
@@ -90,6 +96,6 @@ src/d3solver/
 notes/grammar.md   the CSV grammar, grounded in the shipped data
 notes/scope.md     the agreed problem statement
 notes/layer2.md    the two optimizers: encoding, what is approximate, how to read the results
-scripts/           runnable drivers (solve_us, frontier, optimize_*, milp_us)
+scripts/           runnable drivers (solve_us, frontier, optimize_*, milp_us, economy_sweep)
 tests/             formula, PWL, and MILP-vs-solver agreement tests
 ```

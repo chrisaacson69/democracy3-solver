@@ -15,6 +15,7 @@ from pathlib import Path
 from d3solver import load_model
 from d3solver.config import sim_dir
 from d3solver.savegame import load_savegame
+from d3solver.scenario import from_savegame
 from d3solver.solver import solve_equilibrium
 
 DEFAULT_SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
@@ -27,12 +28,8 @@ def main() -> None:
     save = load_savegame(save_path)
 
     policies = {n: d["val"] for n, d in save.policies.items()}
-    exo = {
-        "_global_socialism": save.globals.get("socialism", 0.5),
-        "_global_liberalism": save.globals.get("liberalism", 0.5),
-        "_globaleconomy_": save.globals.get("globaleconomy_pos", 0.5),
-        "_year": save.globals.get("globaleconomy_years", 0.0),
-    }
+    scen = from_savegame(save)          # economy at its long-run average (notes/scope.md)
+    exo = scen.exogenous
 
     warm = "--warm" in sys.argv
     init_values = None

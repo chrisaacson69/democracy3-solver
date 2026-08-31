@@ -64,7 +64,25 @@ approval is never an objective target unless explicitly chosen.
    confirmed against the US save (`scripts/check_combination.py`). See `notes/grammar.md`.
 2. **Situations** — load `situations.csv` into the edge index; active-state comes from the save
    (12 active in the US start). Needed for high-connectivity nodes (CrimeRate, Health, …).
-3. **Exogenous globals** `_globaleconomy_`, `_year` — read from the save; the 5 currently-skipped nodes.
+3. **Exogenous globals** `_globaleconomy_`, `_year` — read from the save.
+   - `_globaleconomy_` — **RESOLVED 2026-08-31.** The averaging decision below was *not* implemented:
+     every script read `save.globals.get("globaleconomy_pos", 0.5)`, and since that key is always
+     present the `0.5` fallback never fired, so all results ran at the save's momentary cycle position
+     (0.3113 for the US start). `scenario.py` now owns this with the average as the default and the
+     position as a sweepable parameter (`scripts/economy_sweep.py`).
+   - `_year` — **OPEN, do not guess.** It is fed `globaleconomy_years = 8.0`, which is exactly
+     `GLOBAL_ECONOMY_CYCLE_LENGTH_YEARS` in `data/simconfig.txt` — the cycle *length*, not elapsed
+     time. Every other node is normalised to [0,1], so 8.0 is an order of magnitude out of range; it
+     drives `_Terrorism +0.08` and `OilSupply −0.12`. What the engine actually passes for `_year` is
+     unresolved. Left as-found deliberately rather than replaced with a plausible number.
+6. **The budget has two incompatible halves** (found 2026-08-31 via `economy_sweep.py`).
+   `AnchoredBudget.cost(name, setting)` takes **no state argument**: the 46 policies enacted in the save
+   scale with the slider alone and are economy-blind, while the 77 CSV-estimated ones carry the GDP
+   multipliers. Seven policies whose CSVs declare a GDP multiplier are anchored and have it discarded.
+   Consequence: sweeping the status-quo vector across the whole economy cycle gives a **perfectly flat**
+   balance, so the savings-buffer premise in the addendum below is currently **not measurable**.
+   `data/missions/<country>/` (min/max GDP, income bands, `wealth_mod`, population, starting debt) is
+   the grounded source that would make cost and income uniform — and would generalise past the US.
 4. **Interest / credit-rating mechanic** — for debt-level scenarios and Phase B.
 5. **Value normalization / ranges** per node (esp. voter opinions vs. [0,1] sim values).
 
@@ -74,7 +92,9 @@ approval is never an objective target unless explicitly chosen.
   elections). We compute a **counterfactual equilibrium**: policies fully implemented + economy at its
   long-run **average** (`_globaleconomy_` is a parameter, default = average; sweepable for good/bad
   times). `balance ≥ 0` is enforced on the *average-economy* equilibrium; the cycle is buffered by
-  **savings** (bank surplus in booms, draw down in busts).
+  **savings** (bank surplus in booms, draw down in busts). *Implementation:* `scenario.py`
+  (`AVERAGE_ECONOMY = 0.5`, sweepable via `Scenario.with_economy`). *Status of the buffer claim:*
+  untested — see open mechanic 6; the budget cannot currently express it.
 - **The network is bistable.** Same policies admit a self-sustaining "doom-loop" basin (high crime ↔
   low GDP ↔ high unemployment, crime/health situations active) and a "virtuous" basin. The solver
   supports both: cold-start (from defaults) → virtuous; `--warm` (from a save's values+active set) →

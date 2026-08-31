@@ -73,31 +73,70 @@ a linearisation, verify against the oracle, **re-linearise where the oracle actu
 A `margin` term absorbs the shortfall the oracle reports and relaxes once it stops binding. Converged
 on the US start in 4 rounds.
 
-## Results on the US start (welfare basket + GDP, `balance ≥ 0`)
+## Scenario: which economy are we optimizing at?
 
-Status quo: `X = +0.204`, balance `−$97Bn`, 12 situations active.
+`notes/scope.md` fixes the world economy at its **long-run average** and lets savings absorb the cycle.
+The scripts did not do that. Every one built its exogenous dict with
+`save.globals.get("globaleconomy_pos", 0.5)` — and that key is present in every save, so the `0.5`
+fallback never fired and every result this project had produced was computed at the save's momentary
+cycle position (**0.3113** for the US start: a below-average economy).
+
+`scenario.py` now owns that construction, with the economy as an explicit parameter defaulting to the
+average, which also makes scope.md's "sweepable for good/bad times" a real capability rather than a
+sentence. **All numbers below are at economy = 0.5.**
+
+`_year` is deliberately left as found — it is fed `globaleconomy_years = 8.0`, which is exactly
+`GLOBAL_ECONOMY_CYCLE_LENGTH_YEARS` from `data/simconfig.txt`, i.e. the cycle *length*, not elapsed
+time. Every other node here is normalised to [0,1]. It is flagged, not guessed at; see `notes/scope.md`.
+
+## Results on the US start (welfare basket + GDP, `balance ≥ 0`, economy = 0.5)
+
+Status quo: `X = +0.238`, balance `−$97Bn`, 12 situations active.
 
 | Optimizer | X (Layer-1 verified) | balance | basin |
 |---|---|---|---|
 | greedy (pre-existing) | +1.44 | ~$0Bn | frozen |
-| **trust-region SLP** | **+3.000** | $0Bn | **frozen** |
-| **MILP + refinement** | **+2.977** | +$75Bn | **free — escaped 10 of 12** |
+| **trust-region SLP** | **+3.000** | +$4Bn | **frozen** |
+| **MILP + refinement** | **+2.905** | +$140Bn | **free — escaped 7 of 12, entered 8** |
 
 ### Read these two numbers carefully
 
 `X = 3.000` is the **theoretical ceiling** of this weight basket, not a solver artifact: all six
 objective nodes sit exactly on their CSV clamp bounds (`Equality = Health = GDP = 1`,
 `PovertyRate = Unemployment = CrimeRate = 0`). It is also **conditional on the frozen basin**. Re-score
-that same policy vector with the situations released and it falls to **X = 2.803 at −$9Bn — infeasible**.
+that same policy vector with the situations released and it falls to **X = 2.788 at −$42Bn — infeasible**.
 
-So the SLP's higher number is the less trustworthy one. The MILP's `+2.977` is lower *and* self-consistent
-under the exact solver with situations free. When the two disagree, the one that did not assume its
-basin wins.
+So the SLP's higher number is the less trustworthy one. The MILP's `+2.905` is lower *and*
+self-consistent under the exact solver with situations free. When the two disagree, the one that did
+not assume its basin wins.
 
 **This objective saturates**, which makes it a weak test of the machinery: once every component can be
 maxed at once there is no tradeoff left, and the "no single solution / Pareto frontier" premise in
 `notes/scope.md` is never exercised. A basket that actually competes (GDP against Equality at a fixed
 budget) would be the sharper next probe.
+
+## Does the savings buffer cover the busts? (`scripts/economy_sweep.py`)
+
+Scope.md enforces `balance ≥ 0` at the average on the reasoning that booms bank a surplus that pays
+for busts. That is testable: hold a policy vector fixed and re-solve across the economy's range.
+
+Sweeping the SLP optimum, balance runs **min −$21Bn, mean −$3Bn, max +$4Bn** — summed surplus $25Bn
+against summed deficit $53Bn. The mechanism behind the asymmetry is worth naming: the optimizer drives
+**GDP to its clamp of 1.0**, so above economy ≈ 0.5 the upside stops growing while the downside keeps
+costing. *A buffer cannot be filled by booms that are capped.*
+
+**But the sweep cannot yet settle the question, and the reason is a defect in the budget model.**
+Sweeping the *status-quo* vector gives a balance that is **perfectly flat at −$97Bn across the entire
+cycle** — because `AnchoredBudget.cost(name, setting)` takes no state argument at all. The 46 policies
+enacted in the save scale with the slider alone and are **economy-blind by construction**; only the 77
+CSV-estimated ones carry the GDP multipliers. Seven policies whose CSVs explicitly declare a GDP
+multiplier are anchored, and have that term silently discarded.
+
+So the budget has two incompatible halves, and only one of them can feel the economy. Until that is
+uniform, the savings-buffer premise is **not measurable** — which is a concrete, grounded reason to
+read `data/missions/<country>/` (`min_gdp`/`max_gdp`, `min_income`/`max_income`, `wealth_mod`,
+`population`, `starting_debt`): those are the constants that would let cost and income be computed
+from the state for *every* policy, instead of anchored-to-a-screenshot for a third of them.
 
 ## Open
 
