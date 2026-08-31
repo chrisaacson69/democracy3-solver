@@ -1,0 +1,12 @@
+# Machine-specific data path (mirrors the vault's local-paths philosophy)
+config.toml
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+build/
+dist/

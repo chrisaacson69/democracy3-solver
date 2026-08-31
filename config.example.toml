@@ -1,0 +1,7 @@
+# Copy to config.toml (gitignored) and set the path to your Democracy 3 install's simulation data.
+# The game's CSVs are the single source of truth — we read them in place rather than copying, so
+# there's no drift when the game updates.
+
+[data]
+# Directory containing simulation.csv, policies.csv, votertypes.csv, etc.
+sim_dir = "C:/Program Files (x86)/Steam/steamapps/common/Democracy 3/data/simulation"

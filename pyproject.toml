@@ -1,0 +1,23 @@
+[project]
+name = "d3solver"
+version = "0.0.1"
+description = "Game-data + optimization approach to solving Democracy 3 (Positech Games)"
+requires-python = ">=3.11"
+# Core (Layer 1) has no runtime deps beyond the stdlib. The LP/MILP library (Layer 2) is
+# deliberately deferred — see notes/roadmap in README.
+
+dependencies = ["pulp>=2.7"]  # LP/MILP solver (Layer 2 optimizer; bundles CBC)
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
