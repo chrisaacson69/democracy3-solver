@@ -14,3 +14,7 @@ dist/
 # built explorer page (regenerate with scripts/build_explorer.py)
 explorer.html
 explorer_model.json
+
+# Savegames are Positech mission data + full game state — keep them local.
+# Any Democracy 3 playthrough can produce one; see README for what the scripts expect.
+tests/fixtures/*.xml
