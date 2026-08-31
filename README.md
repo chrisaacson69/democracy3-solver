@@ -77,6 +77,13 @@ pytest
 Or set `D3_SIM_DIR` instead of editing `config.toml`. The game CSVs are read in place (single source
 of truth — no copy, no drift).
 
+**You also need a savegame.** The scripts under `scripts/` read
+`tests/fixtures/autosave_usa_turn1.xml` — the US start, turn 1 — for the policy vector, the situation
+set, and the per-policy cost/income anchors. It is **not in the repo**: a savegame embeds Positech's
+mission data and the whole game state, and this repo is public. Produce your own by starting a US game
+and playing one turn, then copy the autosave to that path. `tests/fixtures/*.xml` is gitignored. The
+test suite needs none of this — all 38 tests are synthetic and run on a bare clone.
+
 ## Layout
 
 ```
