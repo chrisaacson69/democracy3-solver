@@ -316,11 +316,20 @@ Private pensions rise when the state pension goes; private schools and housing *
 model private provision scales with ability to pay, and the collapse in wages and productivity removes
 it. That is a coherent mechanism, not a thumb on the scale.
 
-But **the model cannot represent the mechanism the position actually rests on.** There is no node for
-private security, private arbitration or private law — so when crime pegs at 1.000, that is partly the
-model having no way to express the ancap answer to crime, rather than a finding that the answer fails.
-Read this as *what Positech's simulation says*, which is what it is, and not as evidence about the
-world. The same caution applies to every ideological scenario the bench can run, in both directions.
+But **the model cannot represent the mechanism the position actually rests on**, and the shape of the
+gap is specific. It is not that private-sector policies are missing — there are fifteen of them:
+Healthcare Vouchers, School Vouchers, School and Health Tax Credits, Private Prisons, Agriculture and
+Organic Farming Subsidies, Rural Development Grants. **Every single one is state-funded.** Not one
+costs nothing, so zero revenue deletes the entire privatisation toolkit by construction.
+
+So the model can express *the state buying private provision* — vouchers, contracting out, subsidised
+markets — and cannot express *provision arising because the state withdrew*. There is likewise no node
+for private security, arbitration or law. When crime pegs at 1.000, that is in large part the
+simulation having no vocabulary for the position's own answer to crime, not a finding that the answer
+fails. This is a **structurally unfair test**, and the run should be read as *what Positech's model
+says*, not as evidence about the world. The same caution applies to every ideological scenario the
+bench can run, in both directions — the useful question about any of them is first "can this model
+even represent the mechanism being claimed?" 
 
 The voter reaction is the genuinely surprising part, and it is not the expected one:
 
