@@ -141,7 +141,7 @@ def gradient_optimize(model, p0, exo, objective, ab, csv_cost_k, csv_income_k, *
     convergence. Deterministic given p0 — call from several starts to surface alternate optima.
     """
     plist = list(policies or model.policies)
-    p = {n: float(p0.get(n, 0.0)) for n in plist}
+    p = {n: float(p0.get(n, 0.0)) for n in model.policies}   # held; only plist moves (see slp_optimize)
 
     def L(settings):
         o, b, eq = evaluate(model, settings, exo, objective, ab, csv_cost_k, csv_income_k,
@@ -207,7 +207,10 @@ def slp_optimize(model, p0, exo, objective, ab, csv_cost_k, csv_income_k, *,
     import pulp
 
     plist = list(policies or model.policies)
-    p = {n: float(p0.get(n, 0.0)) for n in plist}
+    # `policies` restricts what may MOVE, not what exists. The rest of the vector is held at p0 --
+    # dropping it would delete those policies from the state entirely, and any effect formula that
+    # references one by name then fails to resolve.
+    p = {n: float(p0.get(n, 0.0)) for n in model.policies}
 
     def ev(settings):
         return evaluate(model, settings, exo, objective, ab, csv_cost_k, csv_income_k,
@@ -279,7 +282,9 @@ def slp_optimize(model, p0, exo, objective, ab, csv_cost_k, csv_income_k, *,
         # predicted vs actual improvement in the merit function
         pred = (float(pulp.value(prob.objective) or 0.0)
                 + mu * violation(base_bal))              # model merit gain relative to d = 0
-        cand = {n: min(1.0, max(0.0, p[n] + step[n])) for n in plist}
+        cand = dict(p)
+        for n in plist:
+            cand[n] = min(1.0, max(0.0, p[n] + step[n]))
         new_obj, new_bal, _ = ev(cand)
         actual = (new_obj - mu * violation(new_bal)) - (base_obj - mu * violation(base_bal))
         rho = actual / pred if pred > 1e-12 else (1.0 if actual > 0 else -1.0)

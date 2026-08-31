@@ -278,3 +278,68 @@ cost multiplier had been sign-inverted. **A policy that appears to deliver an ou
 bug report, not a bargain** — the same instinct that flagged `X = 3.000` as worth checking should have
 flagged a $0Bn price tag on a $115Bn programme.
 
+## Ancapistan: what the model says about a state with no revenue
+
+Run for fun, but it produced a real result and a real bug. With `balance >= 0` and zero taxation,
+income is zero, so spending must be zero too. That leaves **12 of 123 policies** — the ones that cost
+nothing and raise nothing, i.e. pure law: Abortion Law, Alcohol Law, Ban Sunday Shopping, Creationism,
+Death Penalty, Gambling, Gated Communities, Legalize Prostitution, Maternity Leave, Narcotics, Racial
+Profiling, School Prayers. That list *is* the policy space of a stateless state in this model.
+
+| | X | balance | GDP | Unemployment | Crime | Poverty | crises |
+|---|---|---|---|---|---|---|---|
+| US start | +0.573 | −$97Bn | 0.621 | 0.384 | 0.008 | 0.254 | 8 bad / 1 good |
+| Ancapistan, nothing enacted | −2.131 | $0Bn | 0.170 | **1.000** | **1.000** | 0.660 | **15 bad / 0 good** |
+| Ancapistan, laws optimised | −2.130 | $0Bn | 0.171 | 1.000 | 1.000 | 0.660 | 15 bad / 0 good |
+
+Unemployment and crime both **peg at their maximum**, GDP falls to a quarter, and fifteen harmful
+crises fire at once (Armed Robbery, Street Gangs, Inner City Riots, Vigilante Mobs, Contagious
+Disease, Hospital Overcrowding, Technology Backwater…). X lands at −2.13 against a floor of −3.
+
+The sharper finding is the third row: **optimising all twelve free laws moves X by 0.001.** Stripped
+of money, policy is inert here — the levers that remain cannot reach the outcomes.
+
+### Does the model give private provision a fair hearing?
+
+Partly, and it is worth being precise rather than triumphant. Democracy 3 *does* carry explicit
+private-provision nodes, and one behaves exactly as the position predicts:
+
+| | US start | ancapistan |
+|---|---|---|
+| Private Pensions | 0.403 | **0.585** ← the market does step in |
+| Private Schools | 0.651 | 0.585 |
+| Private Housing | 0.711 | 0.485 |
+| Wages | 0.411 | 0.190 |
+| Productivity | 0.672 | 0.287 |
+
+Private pensions rise when the state pension goes; private schools and housing *fall*, because in this
+model private provision scales with ability to pay, and the collapse in wages and productivity removes
+it. That is a coherent mechanism, not a thumb on the scale.
+
+But **the model cannot represent the mechanism the position actually rests on.** There is no node for
+private security, private arbitration or private law — so when crime pegs at 1.000, that is partly the
+model having no way to express the ancap answer to crime, rather than a finding that the answer fails.
+Read this as *what Positech's simulation says*, which is what it is, and not as evidence about the
+world. The same caution applies to every ideological scenario the bench can run, in both directions.
+
+The voter reaction is the genuinely surprising part, and it is not the expected one:
+
+```
+Capitalist    +0.140 -> +0.110      Poor           +0.874 -> -0.421
+Wealthy       +0.129 -> +0.040      Socialist      -0.311 -> -0.953
+Middle Income +0.045 -> +0.370      Conservatives  +0.561 -> -1.000
+```
+
+**Capitalists and the wealthy are *less* happy under zero taxation**, because the objective collapse
+outweighs the tax relief; conservatives go to the floor as law and order disintegrates. Middle Income
+is the only group that gains. Whatever else the model encodes, it does not simply hand the win to the
+constituency that wanted the policy.
+
+### The bug this turned up
+
+`slp_optimize(policies=[...])` is meant to restrict which policies may *move*. It was building its
+working vector from that subset alone, which deleted every other policy from the state — so the first
+effect formula that referenced one by name (`StateSchools`) failed to resolve and the run crashed.
+Restricting what may move is not the same as restricting what exists. Fixed in both `slp_optimize`
+and `gradient_optimize`; the parameter had never been exercised before this run.
+
