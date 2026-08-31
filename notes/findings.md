@@ -383,3 +383,43 @@ any configuration is unaffordable, because revenue is effectively unbounded. Eve
 question returns yes. The fix and the plan that depends on it are in
 [`notes/private-provision-design.md`](private-provision-design.md).
 
+## Which crises are traps? Almost none — 24 of 27 clear themselves
+
+The transition worry is that a route to a good destination might dip through a crisis and, because
+hysteresis makes crises cheaper to cause than to clear, get stuck there. The tempting workaround is to
+switch crises off during the transition and back on afterwards. **Don't** — that experiment has already
+been run by accident: the SLP with `freeze_active=True` reported `X = 3.000`, and the identical policy
+vector with the crises released was **2.788 at −$42Bn, infeasible**. Freezing does not neutralise a
+crisis, it hides it until you stop looking.
+
+The answerable question is narrower and much more useful: *given the destination policy set, which
+crises are self-sustaining once entered?* Force each dormant crisis on, re-solve with hysteresis live,
+and see whether the policy set clears it again.
+
+Against the balanced-welfare optimum: **24 of 27 clear on their own. Three do not.**
+
+| self-sustaining | kind | value at eq. | stop trigger | margin |
+|---|---|---|---|---|
+| High Productivity | **positive — a lock-in you want** | 0.519 | 0.40 | +0.119 |
+| Petrol Protests | harmful | 0.523 | 0.40 | +0.123 |
+| Teachers Strike | harmful | 0.445 | 0.40 | **+0.045** |
+
+So the transition is far less fragile than expected. Only **two** harmful crises are absorbing, and
+both sit close to their exit — Teachers Strike is barely stuck at all, 0.045 above the threshold that
+would clear it. Everything else is a speed bump: unpleasant to pass through, but it resolves once the
+policy set is in place.
+
+Three consequences for planning a route:
+
+1. **Turning crises off is unnecessary as well as unsound.** The dust really does settle by itself for
+   24 of 27. The constraint is not "never enter a crisis", it is "never enter *these two*".
+2. **One trap is worth falling into.** High Productivity is a positive situation that locks in once
+   entered. Hysteresis cuts both ways, and a route that deliberately trips it is a route worth taking.
+3. **A shallow trap is a budget line, not a wall.** Teachers Strike needs 0.045 of movement to clear.
+   That is a cost to price against the alternatives, not a hard constraint — exactly the kind of thing
+   `scripts/cost_effectiveness.py` can rank.
+
+Method note: reversibility is a property of the *destination policy set*, not of the crisis. A
+different endpoint will produce a different trap list, so this test belongs in route planning, run
+against whatever destination the joint solve returns — not cached as a fact about the game.
+
