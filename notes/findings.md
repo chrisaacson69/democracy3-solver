@@ -91,3 +91,67 @@ Everything above was computed at the **average** world economy (0.5), not the sa
 `notes/scope.md` open mechanic 3. The budget figures come from the anchored half of the budget model,
 which is grounded in the save's real dollar figures but is economy-blind; the caveat in
 `notes/layer2.md` applies to any balance number that has to hold across the economic cycle.
+
+## The real question: are they good *value*? (`scripts/cost_effectiveness.py`)
+
+Establishing that military spending buys jobs and pensions buy poverty reduction settles nothing on
+its own — everything in this model buys something, and the budget is finite. Paying people to march
+around is *a* way to reduce unemployment; compelling saving is *a* way to reduce poverty. The question
+is whether the same outcomes are cheaper somewhere else.
+
+Ranking every enacted programme by **outcome per dollar** — remove it entirely, divide the target lost
+by the money freed — says no, they are not good value.
+
+**Buying jobs** (target: less unemployment, per $100Bn freed):
+
+| programme | level | costs | unemployment it buys | per $100Bn |
+|---|---|---|---|---|
+| Border Controls | 0.40 | $3Bn | 0.1143 | **3.74** |
+| Citizenship Tests | 0.22 | ~$0Bn | 0.0035 | 1.33 |
+| Foreign Aid | 0.22 | $18Bn | 0.0816 | **0.45** |
+| Intelligence Services | 0.78 | $39Bn | 0.1053 | 0.27 |
+| Police Force | 0.55 | $36Bn | 0.0684 | 0.19 |
+| Rail Subsidies | 0.45 | $64Bn | 0.0723 | 0.11 |
+| **Military Spending** | 0.88 | **$248Bn** | 0.2673 | **0.11** |
+
+Military spending is the **tenth** most cost-effective jobs programme the US is already running.
+Border Controls delivers **43% of the military's entire employment effect for 1.2% of the money**.
+Foreign aid is 4× better per dollar; intelligence services 2.5×.
+
+**Buying poverty reduction** (target: less poverty, per $100Bn freed):
+
+| programme | level | costs | poverty it buys | per $100Bn |
+|---|---|---|---|---|
+| Food Stamps | 0.82 | $21Bn | 0.0983 | **0.46** |
+| Unemployed Benefit | 0.12 | $16Bn | 0.0143 | 0.09 |
+| **State Pensions** | 0.51 | **$215Bn** | 0.1019 | **0.05** |
+| State Schools | 0.35 | $102Bn | 0.0347 | 0.03 |
+
+This one is stark. **Food stamps deliver essentially the same poverty reduction as state pensions —
+0.0983 against 0.1019 — for one tenth of the money.** Pensions are a 10× worse buy for the outcome
+they are nominally there to produce.
+
+### There are outcomes you can buy for free
+
+Twenty policies reduce unemployment *and* improve the balance. The largest: Import Tariffs (+0.0116),
+Internet Tax (+0.0104), Gambling (+0.0067), and **Petrol Tax, which cuts unemployment and raises
+$124Bn**. Ten do the same for poverty. Any budget that has not exhausted its free wins has no business
+arguing about which expensive programme to fund — that is the shadow-price logic in `notes/scope.md`
+made concrete: λ is not binding until the free moves are gone.
+
+### What is grounded and what is not
+
+**Every programme in the two tables above is enacted in the save**, so its cost is the game's own
+dollar figure via `AnchoredBudget`, not an estimate. The head-to-head comparisons — military against
+border controls, pensions against food stamps — are apples to apples.
+
+The *marginal* "best buys" list is a mix. Rent Controls ($1Bn for the single best poverty ratio),
+Winter Fuel Subsidy, Free School Meals, Healthcare Vouchers, Health Tax Credits and Rural Development
+Grants are **not** enacted in the save, so their costs are CSV estimates scaled by a global
+calibration factor. Treat a not-yet-enacted policy's price tag as an estimate, and a running
+programme's as grounded.
+
+Two further limits worth stating. These rankings are **single-target by construction** — that is what
+makes them legible, and it also means they say nothing about what a cut does to everything else (see
+the crises above). And *average* value assumes removing the whole programme, while *marginal* value
+measures a nudge from where it sits; they diverge wherever returns diminish, which is most places.
