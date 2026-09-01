@@ -477,3 +477,54 @@ So the ">100% tax rate" worry does not bite in this model. What bites first is G
 crisis thresholds that come with it. Any "tax only enough to fund it" exercise should be constrained
 by *where the economy still works*, not by where the money runs out.
 
+## The tax dial: how good can the country be at each level of taxation?
+
+`scripts/tax_frontier.py` pins taxation, lets the optimiser spend what that raises however it likes
+subject to `balance >= 0`, and records the country that results. Rows marked * were re-solved from
+three starts after the single-start pass failed on them (see the method note below).
+
+|  tax | income | spend | balance | X | GDP | Unemp | Poverty | Crime | Health | Equality |
+|---|---|---|---|---|---|---|---|---|---|---|
+| US start, **unoptimised** | $1222B | $1276B | −$54B | **+0.573** | 0.621 | 0.384 | 0.254 | 0.008 | 0.379 | 0.218 |
+| 0.20 | $244B | $244B | $0B | +1.294 | 0.587 | 0.548 | 0.161 | 0.000 | 0.938 | 0.479 |
+| 0.40 * | $486B | $486B | $0B | +1.625 | 0.588 | 0.521 | 0.024 | 0.000 | 0.880 | 0.702 |
+| 0.60 | $742B | $742B | $0B | +1.187 | 0.621 | 0.437 | 0.143 | 0.000 | 0.779 | 0.367 |
+| 0.80 | $1036B | $871B | +$165B | +1.715 | 0.699 | 0.320 | 0.109 | 0.000 | 1.000 | 0.445 |
+| **1.00 *** | $1306B | $1217B | **+$89B** | **+1.913** | 0.730 | 0.221 | 0.122 | 0.000 | 0.982 | 0.544 |
+| 1.20 | $1574B | $1574B | +$1B | +2.447 | 0.753 | 0.000 | 0.000 | 0.000 | 1.000 | 0.694 |
+| 1.40 | $1923B | $1887B | +$36B | +2.687 | 0.856 | 0.000 | 0.000 | 0.000 | 1.000 | 0.831 |
+
+Three readings, in order of how much they matter.
+
+**1. Reallocation alone is worth more than any tax change.** At *unchanged* taxation, simply spending
+the money better takes X from **+0.573 to +1.913** and turns a −$54Bn deficit into a **+$89Bn
+surplus** — while spending slightly *less* ($1,217Bn against $1,276Bn). Health 0.379 → 0.982, poverty
+0.254 → 0.122, unemployment 0.384 → 0.221, crime to zero. Before any argument about the size of the
+state, the current one is leaving most of its own budget's value on the table.
+
+**2. You can run at 40% of current taxation and keep 85% of the achievable welfare.** Tax 0.40 reaches
+X = +1.625 against the fully-funded +1.913, on **$486Bn instead of $1,217Bn** — and it is *better* on
+poverty (0.024 vs 0.122) and equality (0.702 vs 0.544). The cheap outcomes really are cheap.
+
+**3. Employment is the entire cost of a small state.** It is the one column that does not come cheap:
+0.221 at full taxation against 0.521 at 0.40× and 0.548 at 0.20×. Health, poverty, crime and equality
+are all purchasable at a fifth of the budget; jobs are not. This is the military-as-jobs-programme
+finding arriving from the opposite direction, and it is the sharpest target the private-provision work
+has: **an invented REA adds least on health or crime, and most on employment.**
+
+### Method note: single-start local search was unreliable here
+
+The first pass produced two rows that dipped below both neighbours *and* missed the balance
+constraint. A monotone curve should not have holes, and those holes were the optimizer failing rather
+than the world being strange — tax 0.40 read X = +0.774 when +1.625 was available, a 2× error.
+
+Re-solved from three starting points (as-is, all-spending-zero, all-spending-one), both recovered. The
+spread at tax 1.00 is the warning worth keeping: **X = +1.913, +1.909 and +0.047** from the three
+starts. The last is a perfectly valid local optimum and a useless answer. `tax_frontier.py` now
+multi-starts by default.
+
+One more trap this run walked into: the first corrected attempt optimised with `freeze_active=True`
+and re-scored with `False`, and *every* row came back infeasible. Now that the budget carries state
+elasticity it is **basin-dependent**, so optimising and scoring in different basins silently breaks the
+constraint the optimiser thought it had satisfied. Optimise and report in the same basin.
+
