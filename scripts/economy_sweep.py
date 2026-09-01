@@ -27,7 +27,8 @@ from d3solver.budget import anchored_from_save, calibrate
 from d3solver.config import sim_dir
 from d3solver.optimize import evaluate, make_objective, slp_optimize
 from d3solver.savegame import load_savegame
-from d3solver.scenario import AVERAGE_ECONOMY, from_savegame, save_economy
+from d3solver.scenario import (AVERAGE_ECONOMY, anchor_equilibrium, from_savegame,
+                               save_economy)
 
 SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
 WEIGHTS = {"Equality": 1.0, "Health": 1.0, "GDP": 1.0,
@@ -49,7 +50,8 @@ def main() -> None:
     print(f"save was played at economy={save_economy(save):.4f}; "
           f"this scenario pins it at {scen.economy:.4f}\n")
 
-    ab = anchored_from_save(save, 1191.0, 1288.0)
+    ab = anchored_from_save(save, 1191.0, 1288.0,
+                               model=model, anchor_state=anchor_equilibrium(model, scen))
     csv = calibrate(model, scen.policies, dict(save.sim_values), 1191.0, 1288.0)
     obj = make_objective(WEIGHTS)
 

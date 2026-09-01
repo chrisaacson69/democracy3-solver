@@ -41,7 +41,8 @@ def main() -> None:
     print("  (game: Military 225, StatePensions 204, StateSchools 98, StateHealth 95, Space 78)")
 
     from d3solver.budget import anchored_from_save
-    ab = anchored_from_save(save, INCOME_TARGET, EXPENDITURE_TARGET)
+    ab = anchored_from_save(save, INCOME_TARGET, EXPENDITURE_TARGET,
+                            model=model, anchor_state=anchor_equilibrium(model, scen))
     bb = ab.balance(settings)
     print(f"\n[anchored + calibrated] income=${bb['income']:.1f}Bn  expenditure=${bb['expenditure']:.1f}Bn  "
           f"balance=${bb['balance']:.1f}Bn")

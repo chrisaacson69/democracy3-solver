@@ -14,7 +14,7 @@ from d3solver.budget import anchored_from_save, calibrate
 from d3solver.config import sim_dir
 from d3solver.optimize import make_objective, marginal_analysis, rank_moves
 from d3solver.savegame import load_savegame
-from d3solver.scenario import from_savegame
+from d3solver.scenario import anchor_equilibrium, from_savegame
 
 SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
 WEIGHTS = {"Equality": 1.0, "Health": 1.0, "PovertyRate": -1.0, "Unemployment": -1.0, "CrimeRate": -1.0}
@@ -30,7 +30,8 @@ def main() -> None:
     scen = from_savegame(save)          # economy at its long-run average (notes/scope.md)
     exo = scen.exogenous
 
-    ab = anchored_from_save(save, income_target=1191.0, expenditure_target=1288.0)
+    ab = anchored_from_save(save, 1191.0, 1288.0,
+                               model=model, anchor_state=anchor_equilibrium(model, scen))
     state_for_csv = dict(save.sim_values)
     csv = calibrate(model, settings, state_for_csv, 1191.0, 1288.0)  # CSV scales for inactive policies
 

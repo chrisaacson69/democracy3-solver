@@ -77,8 +77,8 @@ def linear_budget(model: GameModel, ab: AnchoredBudget, csv_cost_k: float, csv_i
     lb = LinearBudget()
     for name, pol in model.policies.items():
         if ab.val0.get(name, 0.0) > 1e-9:      # grounded anchor from the save
-            lb.cost_slope[name] = ab.cost(name, 1.0)
-            lb.income_slope[name] = ab.income(name, 1.0)
+            lb.cost_slope[name] = ab.cost(name, 1.0, ref_state)
+            lb.income_slope[name] = ab.income(name, 1.0, ref_state)
         else:                                   # not enacted in the save -> CSV estimate
             lb.cost_slope[name] = raw_cost(pol, 1.0, ref_state) * csv_cost_k
             lb.income_slope[name] = raw_income(pol, 1.0, ref_state) * csv_income_k

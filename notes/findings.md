@@ -423,3 +423,57 @@ Method note: reversibility is a property of the *destination policy set*, not of
 different endpoint will produce a different trap list, so this test belongs in route planning, run
 against whatever destination the joint solve returns — not cached as a fact about the game.
 
+## Income elasticity fixed — and the wall is not revenue, it is the economy
+
+`AnchoredBudget` now carries the CSVs' state elasticity as a ratio about the anchor point:
+
+```
+income(n, s, state) = i0 * (s/v0) * k * [ mult(state) / mult(anchor_state) ]
+```
+
+Evaluated at the **anchor's own setting** in both numerator and denominator, so it captures state
+movement only — using the current setting would double-count the `s/v0` scaling already applied, and
+for a policy whose multiplier names an undefined node (`Poor_perc`, where `x` falls back to the
+setting) that error would have been silent.
+
+The reference state is the **equilibrium** of the anchor policy vector, not the save's raw
+`sim_values`. The save is a turn-1 transient, so anchoring to it made the ratio differ from 1.0 at the
+very point the anchors were calibrated for, shifting the US start's balance from −$97.00Bn to
++$49.19Bn. With the equilibrium as reference the balance is **−$97.000Bn both before and after**: the
+regression test that says no previously reported number moved.
+
+### The sweep, before and after
+
+| tax level | before | after | GDP | TaxEvasion |
+|---|---|---|---|---|
+| 0.30 | $2,565Bn | $2,516Bn | 0.589 | 0.407 |
+| **0.50** | $3,996Bn | **$3,599Bn** | 0.492 | 0.622 |
+| 0.60 | $4,428Bn | **$3,459Bn** ↓ | 0.285 | 0.788 |
+| 1.00 | $6,876Bn | $4,019Bn | **0.000** | 1.000 |
+
+Peak revenue falls **42%**, and a real local peak appears at 0.50 with a dip through 0.60 — revenue
+now *falls* as the economy contracts, which it could not do before.
+
+### But there is still no full Laffer curve, and that is the game's doing
+
+Revenue climbs again past 0.8. Two causes, and only one of them is ours:
+
+1. **The shipped multipliers are weak.** At total collapse Income Tax keeps **55%** of its revenue
+   (`GDP,0.5+(0.5*x);TaxEvasion,1.0-(0.2*x)` — evasion caps at a 20% haircut) and Sales Tax keeps 26%.
+   Against a rate rising 0.34 → 1.00, that is not enough to turn the curve over. **Democracy 3 does
+   not model a revenue-maximising tax rate**, and no amount of fixing on our side will invent one.
+2. **The anchored form extrapolates.** `s/v0` is unbounded, so Property Tax at an anchor of 0.11 is
+   extrapolated **9.1×** at s = 1.0. Trustworthy near the anchor, increasingly speculative away from
+   it. The largest revenue line at s = 1.0 — Flat Income Tax at $1,358Bn — is not anchored at all and
+   comes entirely from the CSV path.
+
+### What this means for minimal taxation
+
+**Revenue is not the binding constraint.** At the sensible operating limit — tax 0.50, where GDP is
+still 0.492 — revenue is **$3,599Bn against current spending of $1,288Bn**, roughly 2.8× headroom.
+Past that the economy is dead and the revenue figures are arithmetic rather than policy.
+
+So the ">100% tax rate" worry does not bite in this model. What bites first is GDP collapse and the
+crisis thresholds that come with it. Any "tax only enough to fund it" exercise should be constrained
+by *where the economy still works*, not by where the money runs out.
+

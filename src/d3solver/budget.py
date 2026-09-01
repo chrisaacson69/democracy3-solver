@@ -10,7 +10,7 @@ totals) so ``balance`` is meaningful. Two-parameter calibration, one anchor poin
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Mapping
 
 from .formula import Formula, parse_formula
@@ -124,47 +124,94 @@ def balance(model: GameModel, settings: Mapping[str, float], state: Mapping[str,
 
 @dataclass
 class AnchoredBudget:
-    """Per-policy cost/income anchored to the save's real $ figures, scaled linearly with the setting.
+    """Per-policy cost/income anchored to the save's real $ figures, with the CSVs' state elasticity.
 
-    cost(n, s)   = cost0[n]   * (s / val0[n]) * income/cost global factor
-    Rankings come from the grounded anchors; two global factors pin the absolute totals to known $
-    (absorbing non-policy items like debt interest). Rough by design.
+    The **level** comes from the save (grounded dollars); the **shape** comes from the CSV multipliers,
+    applied as a ratio about the anchor point::
+
+        cost(n, s, state) = cost0[n] * (s / val0[n]) * cost_k * [ mult(state) / mult(anchor_state) ]
+
+    At the anchor state the bracket is exactly 1.0, so every figure this project reported before the
+    elasticity existed is unchanged; away from it, cost and revenue move with the economy the way the
+    shipped data says they should.
+
+    Why this matters more for income than for cost: without it, tax revenue is blind to GDP and
+    TaxEvasion, and the model will happily collect $6,876Bn from an economy whose GDP has reached
+    0.000. That erases the Laffer mechanism the CSVs actually encode (``IncomeTax`` carries
+    ``GDP,0.5+(0.5*x);TaxEvasion,1.0-(0.2*x)``) and leaves the solver unable to report that *any*
+    configuration is unaffordable. See ``notes/private-provision-design.md``.
+
+    The ratio is evaluated at the **anchor's own setting** in both numerator and denominator, so it
+    captures state movement only. Evaluating it at the current setting would double-count the
+    ``s / val0`` scaling already applied — and for a policy whose multiplier names a node the network
+    never defines (``Poor_perc``), where ``x`` falls back to the setting, that error would be silent.
     """
     cost0: dict[str, float]      # $Bn at val0
     income0: dict[str, float]
     val0: dict[str, float]
     cost_k: float = 1.0
     income_k: float = 1.0
+    cost_mult: dict[str, str] = field(default_factory=dict)     # raw CSV multiplier specs
+    income_mult: dict[str, str] = field(default_factory=dict)
+    anchor_state: dict[str, float] = field(default_factory=dict)  # state the anchors were measured at
+    max_elasticity: float = 10.0
 
-    def cost(self, name: str, setting: float) -> float:
+    def _elasticity(self, spec: str, name: str, state: Mapping[str, float] | None) -> float:
+        """mult(state) / mult(anchor_state), both at the anchor setting. 1.0 when not determinable."""
+        if not spec or not state or not self.anchor_state:
+            return 1.0
+        s0 = self.val0.get(name, 0.0)
+        ref = _multiplier_value(spec, s0, self.anchor_state)
+        if ref <= 1e-9:
+            return 1.0                      # no usable reference; keep the anchored level
+        now = _multiplier_value(spec, s0, state)
+        if now <= 0.0:
+            return 0.0                      # a collapsed multiplier means no flow, not a negative one
+        return min(now / ref, self.max_elasticity)
+
+    def cost(self, name: str, setting: float,
+             state: Mapping[str, float] | None = None) -> float:
         v0, c0 = self.val0.get(name, 0.0), self.cost0.get(name, 0.0)
         if v0 <= 1e-9 or c0 <= 0.0:
             return 0.0
-        return c0 * (setting / v0) * self.cost_k
+        return (c0 * (setting / v0) * self.cost_k
+                * self._elasticity(self.cost_mult.get(name, ""), name, state))
 
-    def income(self, name: str, setting: float) -> float:
+    def income(self, name: str, setting: float,
+               state: Mapping[str, float] | None = None) -> float:
         v0, i0 = self.val0.get(name, 0.0), self.income0.get(name, 0.0)
         if v0 <= 1e-9 or i0 <= 0.0:
             return 0.0
-        return i0 * (setting / v0) * self.income_k
+        return (i0 * (setting / v0) * self.income_k
+                * self._elasticity(self.income_mult.get(name, ""), name, state))
 
-    def balance(self, settings: Mapping[str, float]) -> dict[str, float]:
-        inc = sum(self.income(n, s) for n, s in settings.items())
-        cost = sum(self.cost(n, s) for n, s in settings.items())
+    def balance(self, settings: Mapping[str, float],
+                state: Mapping[str, float] | None = None) -> dict[str, float]:
+        inc = sum(self.income(n, s, state) for n, s in settings.items())
+        cost = sum(self.cost(n, s, state) for n, s in settings.items())
         return {"income": inc, "expenditure": cost, "balance": inc - cost}
 
 
 def anchored_from_save(save, income_target: float, expenditure_target: float,
-                       unit: float = 1000.0) -> AnchoredBudget:
-    """Build an AnchoredBudget from a SaveState, calibrated so totals hit the $ targets."""
+                       unit: float = 1000.0, model: GameModel | None = None,
+                       anchor_state: Mapping[str, float] | None = None) -> AnchoredBudget:
+    """Build an AnchoredBudget from a SaveState, calibrated so totals hit the $ targets.
+
+    Pass ``model`` and ``anchor_state`` to enable the CSV state elasticity. Without them the budget
+    is economy-blind — the historical behaviour, kept so old callers do not silently change.
+    """
     cost0 = {n: d["cost"] / unit for n, d in save.policies.items()}
     income0 = {n: d["income"] / unit for n, d in save.policies.items()}
     val0 = {n: d["val"] for n, d in save.policies.items()}
     tot_c, tot_i = sum(cost0.values()), sum(income0.values())
+    cm = {n: (p.cost_multiplier or "") for n, p in model.policies.items()} if model else {}
+    im = {n: (p.income_multiplier or "") for n, p in model.policies.items()} if model else {}
     return AnchoredBudget(
         cost0=cost0, income0=income0, val0=val0,
         cost_k=(expenditure_target / tot_c) if tot_c else 1.0,
         income_k=(income_target / tot_i) if tot_i else 1.0,
+        cost_mult=cm, income_mult=im,
+        anchor_state=dict(anchor_state) if anchor_state else {},
     )
 
 

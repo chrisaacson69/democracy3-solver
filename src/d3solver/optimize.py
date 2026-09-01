@@ -24,13 +24,13 @@ def make_objective(weights: Mapping[str, float]) -> Callable[[Mapping[str, float
 
 def _cost(name, setting, ab, model, state, csv_cost_k):
     if ab.val0.get(name, 0.0) > 1e-9:          # active in save -> grounded anchor
-        return ab.cost(name, setting)
+        return ab.cost(name, setting, state)
     return raw_cost(model.policies[name], setting, state) * csv_cost_k   # inactive -> CSV estimate
 
 
 def _income(name, setting, ab, model, state, csv_income_k):
     if ab.val0.get(name, 0.0) > 1e-9:
-        return ab.income(name, setting)
+        return ab.income(name, setting, state)
     return raw_income(model.policies[name], setting, state) * csv_income_k
 
 

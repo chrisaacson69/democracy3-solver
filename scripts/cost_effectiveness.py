@@ -38,7 +38,7 @@ from d3solver.budget import anchored_from_save, calibrate
 from d3solver.config import sim_dir
 from d3solver.optimize import evaluate, make_objective
 from d3solver.savegame import load_savegame
-from d3solver.scenario import from_savegame
+from d3solver.scenario import anchor_equilibrium, from_savegame
 
 SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
 
@@ -65,7 +65,8 @@ def main() -> None:
     model = load_model(sim_dir())
     save = load_savegame(SAVE)
     scen = from_savegame(save)
-    ab = anchored_from_save(save, 1191.0, 1288.0)
+    ab = anchored_from_save(save, 1191.0, 1288.0,
+                               model=model, anchor_state=anchor_equilibrium(model, scen))
     csv = calibrate(model, scen.policies, dict(save.sim_values), 1191.0, 1288.0)
     obj = make_objective(weights)
 

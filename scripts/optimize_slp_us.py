@@ -16,7 +16,7 @@ from d3solver.budget import anchored_from_save, calibrate
 from d3solver.config import sim_dir
 from d3solver.optimize import make_objective, slp_optimize
 from d3solver.savegame import load_savegame
-from d3solver.scenario import from_savegame
+from d3solver.scenario import anchor_equilibrium, from_savegame
 
 SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
 # Welfare basket + GDP (GDP creates the tradeoff that stops trivial over-taxation)
@@ -33,7 +33,8 @@ def main() -> None:
     seed_active = {n: bool(d["active"]) for n, d in save.situations.items()}
     scen = from_savegame(save)          # economy at its long-run average (notes/scope.md)
     exo = scen.exogenous
-    ab = anchored_from_save(save, 1191.0, 1288.0)
+    ab = anchored_from_save(save, 1191.0, 1288.0,
+                               model=model, anchor_state=anchor_equilibrium(model, scen))
     csv = calibrate(model, cur, dict(save.sim_values), 1191.0, 1288.0)
     obj = make_objective(WEIGHTS)
 

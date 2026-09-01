@@ -103,4 +103,22 @@ def from_savegame(save: SaveState, *, economy: float | None = None,
     )
 
 
-__all__ = ["AVERAGE_ECONOMY", "Scenario", "from_savegame", "save_economy"]
+def anchor_equilibrium(model, scen: "Scenario", *, freeze: bool = True) -> dict[str, float]:
+    """The equilibrium of the scenario's own policy vector — the state the $ anchors correspond to.
+
+    The savegame's raw ``sim_values`` are a **turn-1 transient**, not a fixed point (``notes/scope.md``),
+    so anchoring the budget's state elasticity to them would make the elasticity ratio differ from 1.0
+    at the very point the anchors were calibrated for — quietly shifting the US start's balance. Every
+    comparison this project makes is equilibrium-to-equilibrium, so the reference must be too.
+
+    The equilibrium does not depend on the budget at all, so this can be computed before one exists.
+    """
+    from .solver import solve_equilibrium
+
+    eq = solve_equilibrium(model, scen.policies, scen.exogenous,
+                           init_values=scen.ref_state, init_active=scen.ref_active,
+                           freeze_active=freeze)
+    return dict(eq.values)
+
+
+__all__ = ["AVERAGE_ECONOMY", "Scenario", "anchor_equilibrium", "from_savegame", "save_economy"]
