@@ -528,3 +528,70 @@ and re-scored with `False`, and *every* row came back infeasible. Now that the b
 elasticity it is **basin-dependent**, so optimising and scoring in different basins silently breaks the
 constraint the optimiser thought it had satisfied. Optimise and report in the same basin.
 
+## Can state-funded *private* provision alone fix ancapistan? Health yes, crime no
+
+From a blank slate, adding only the policies that fund private provision (plus taxes to pay for them),
+optimised for the welfare basket:
+
+| scenario | X | spend | balance | GDP | Unemp | Poverty | **Crime** | Health | Equality |
+|---|---|---|---|---|---|---|---|---|---|
+| Ancapistan, nothing at all | −2.131 | $0B | $0B | 0.170 | 1.000 | 0.660 | **1.000** | 0.260 | 0.099 |
+| + the 12 free laws only | −1.623 | $0B | $0B | 0.483 | 0.810 | 0.465 | **1.000** | 0.153 | 0.016 |
+| + private provision + taxes | −0.588 | $645B | **+$807B** | 0.324 | 0.816 | 0.487 | **1.000** | 0.560 | 0.831 |
+| + private + free laws + taxes | −0.194 | $628B | **+$1402B** | 0.381 | 0.748 | 0.470 | **1.000** | 0.645 | 0.998 |
+| + everything (all 123) | +2.898 | $5314B | +$458B | 0.898 | 0.000 | 0.000 | **0.000** | 1.000 | 1.000 |
+
+**Only four policies fund private provision**, and they cover exactly two domains: `HealthcareVouchers`
+and `HealthTaxCredits` push `PrivateHealthcare`; `SchoolVouchers` and `SchoolTaxCredits` push
+`PrivateSchools`. Nothing funds private pensions — `PrivatePensions` rises only when `StatePensions`
+falls, a crowding-in effect with no lever of its own — and `RentControls` carries
+`PrivateHousing −0.1−(0.15*x)`, so it *suppresses* private housing rather than funding it.
+
+What private provision achieves: **equality 0.099 → 0.831** (solved) and **health 0.260 → 0.560**
+(materially improved). What it does not touch: **crime stays pegged at 1.000**, unemployment 0.816,
+poverty 0.487.
+
+**Crime is the failure, and it is total.** The intuition going in was that employment would be the
+gap; employment *is* a gap, but crime is worse — it does not move at all, from any private
+configuration, because the model contains **no privately-provided law enforcement**. `PrivatePrisons`
+exists but merely runs incarceration the state has already ordered; there is no private policing,
+arbitration or rights enforcement to fund.
+
+The tell is the balance column: **+$807Bn, rising to +$1,402Bn**. The optimiser is raising money it
+cannot spend, because after four voucher programmes there is nothing private left to buy. That surplus
+is the size of the hole in the policy space.
+
+**This is the precise case for inventing a Rights Enforcement Agency**, and it is a much sharper target
+than "replace government functions". Crime pegged at maximum with no private mechanism available is
+exactly the shape of a missing-vocabulary problem rather than a defeated argument — the same diagnosis
+as the ancapistan run, now localised to one domain and one number.
+
+A testable follow-on: crime at 1.000 is very likely *causing* much of the rest. It drags GDP, and GDP
+drives unemployment at −0.700, the largest coefficient in the network. So an REA that fixed crime might
+cascade into employment without employing anyone. That is a prediction the bench can check the moment
+such a policy exists.
+
+### What non-private policies actually solve employment
+
+Two distinct routes, and they are worth telling apart:
+
+**Direct employment** — the state as employer, coefficient on `Unemployment`:
+`MilitarySpending −0.230`, `StateHealthService −0.190`, `StateSchools −0.190`,
+`AgricultureSubsidies −0.170`, `RuralDevelopmentGrants −0.150`, `ChildcareProvision −0.110`,
+`ImportTariffs −0.100`, `RailSubsidies −0.090`. Private provision does the same thing more weakly:
+`PrivateSchools −0.130` against state schools' −0.190, `PrivateHealthCare −0.070` against −0.190.
+Vouchers cost about a third of the education employment and nearly two-thirds of the health employment.
+
+**Growth** — `GDP → Unemployment` is `0.9−(0.7*x)`, **at −0.700 the largest single lever in the
+network**, three times military spending. It is raised by `Productivity +0.440`, `InternationalTrade
++0.150`, `Tourism +0.120`, and weakly by `ScienceFunding +0.08`, `TaxShelters +0.06`,
+`SmallBusinessGrants +0.05`, `ForeignInvestorTaxBreaks +0.05`. It is dragged by
+**`CorporationTax −0.270`** and **`CarbonTax −0.250`**, plus the `SkillsShortage −0.317` and
+`CorporateExodus −0.270` situations.
+
+So the market answer to employment is present in the data: **cut corporate taxation, raise
+productivity, stay out of the Skills Shortage and Corporate Exodus basins.** The catch is that the
+direct route is one strong coefficient while the growth route is a chain of weak ones — no single
+GDP-raising policy exceeds +0.08. Whether the chain can beat direct hiring at equal cost is the next
+thing worth measuring.
+
