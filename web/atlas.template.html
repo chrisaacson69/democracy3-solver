@@ -1,0 +1,443 @@
+<title>Democracy 3 Policy Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,800;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#E9EDF0; --card:#FBFCFD; --card-2:#F2F5F8;
+  --ink:#101720; --ink-soft:#5A6672; --ink-faint:#8894A0;
+  --rule:#C7D0D8; --rule-soft:#DDE4EA;
+  --accent:#1B4F8A; --accent-soft:#DCE7F3;
+  --good:#26714F; --bad:#A8382C; --warn:#8A5F0F;
+  --good-bg:#DFEDE6; --bad-bg:#F5E1DE; --warn-bg:#F3E9D5;
+  --shadow:0 1px 0 rgba(16,23,32,.05), 0 2px 8px rgba(16,23,32,.05);
+  /* chart marks: the validated diverging pair (blue<->red, gray midpoint) */
+  --surface-1:#FBFCFD; --helps:#2a78d6; --hurts:#e34948; --mid:#f0efec;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0E1419; --card:#151D24; --card-2:#1B242D;
+  --ink:#E6EBEF; --ink-soft:#94A2AE; --ink-faint:#6E7D8A;
+  --rule:#26323C; --rule-soft:#1F2A33;
+  --accent:#6BA3E0; --accent-soft:#17293D;
+  --good:#57B98C; --bad:#E0776A; --warn:#D6A54A;
+  --good-bg:#152A22; --bad-bg:#2E1A18; --warn-bg:#2B2415;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 10px rgba(0,0,0,.28);
+  --surface-1:#151D24; --helps:#3987e5; --hurts:#e66767; --mid:#383835;
+}}
+:root[data-theme="dark"]{
+  --paper:#0E1419; --card:#151D24; --card-2:#1B242D;
+  --ink:#E6EBEF; --ink-soft:#94A2AE; --ink-faint:#6E7D8A;
+  --rule:#26323C; --rule-soft:#1F2A33;
+  --accent:#6BA3E0; --accent-soft:#17293D;
+  --good:#57B98C; --bad:#E0776A; --warn:#D6A54A;
+  --good-bg:#152A22; --bad-bg:#2E1A18; --warn-bg:#2B2415;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 10px rgba(0,0,0,.28);
+  --surface-1:#151D24; --helps:#3987e5; --hurts:#e66767; --mid:#383835;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;padding:0 0 48px}
+h1,h2,h3{margin:0;text-wrap:balance}
+button{font:inherit;color:inherit}
+.wrap{max-width:1220px;margin:0 auto;padding:0 20px}
+
+.masthead{border-bottom:2px solid var(--ink);background:var(--card);margin-bottom:18px}
+.mast-in{max-width:1220px;margin:0 auto;padding:18px 20px;
+  display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between}
+.brand h1{font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:-.015em;line-height:1.05}
+.brand .sub{font-size:12px;color:var(--ink-soft);margin-top:5px;max-width:70ch}
+.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+  font-weight:600;margin-bottom:5px}
+.mast-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow)}
+.panel+.panel{margin-top:16px}
+.panel>header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:11px 14px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.panel>header h2{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:-.01em}
+.panel>header .hint{font-size:11px;color:var(--ink-faint)}
+.pad{padding:12px 14px}
+.note{font-size:11.5px;color:var(--ink-soft);padding:10px 14px;border-top:1px solid var(--rule-soft);
+  background:var(--card-2)}
+.note b{color:var(--ink)}
+
+/* controls */
+.controls{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding:12px 14px;
+  border-bottom:1px solid var(--rule);background:var(--card-2)}
+.ctl{display:flex;flex-direction:column;gap:4px}
+.ctl label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+select,input[type=search]{padding:6px 9px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--card);color:var(--ink);font:inherit;font-size:13px;min-width:200px}
+.seg{display:flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:6px 11px;font-size:12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--card);font-weight:500}
+.btn{border:1px solid var(--rule);background:var(--card);border-radius:3px;padding:6px 11px;
+  font-size:12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* legend */
+.legend{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:9px 14px;
+  border-bottom:1px solid var(--rule-soft);font-size:11.5px;color:var(--ink-soft)}
+.key{display:inline-flex;align-items:center;gap:6px}
+.sw{width:22px;height:9px;border-radius:2px;display:inline-block}
+.sw.h{background:var(--helps)} .sw.x{background:var(--hurts)}
+.tickkey{width:2px;height:13px;background:var(--ink);display:inline-block}
+
+/* chart */
+.rows{padding:6px 0 2px}
+.r{display:grid;grid-template-columns:210px 1fr 78px 74px;gap:12px;align-items:center;
+  padding:3px 14px;font-size:12.5px;position:relative}
+.r:hover{background:var(--card-2)}
+.r .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r .nm .dept{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);
+  display:block;line-height:1.25}
+.plot{position:relative;height:17px}
+.axis0{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--rule);opacity:.9}
+.bar{position:absolute;top:3px;height:11px;border-radius:2px}
+.bar.h{background:var(--helps)} .bar.x{background:var(--hurts)}
+.tick{position:absolute;top:0;height:17px;width:2px;background:var(--ink);opacity:.75;border-radius:1px}
+.num{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;text-align:right}
+.cost{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;text-align:right;
+  color:var(--ink-soft)}
+.free{color:var(--good);font-weight:600}
+.flag{display:inline-block;font-size:8.5px;letter-spacing:.06em;font-weight:700;padding:1px 4px;
+  border-radius:2px;background:var(--warn-bg);color:var(--warn);margin-left:5px;vertical-align:1px}
+.band{padding:9px 14px 3px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:600;border-top:1px solid var(--rule-soft)}
+.empty{padding:14px;color:var(--ink-faint);font-size:12.5px}
+
+/* tooltip */
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--card);border:1px solid var(--rule);
+  border-radius:3px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:8px 10px;font-size:12px;
+  max-width:300px;display:none}
+#tip h4{font-family:var(--serif);font-size:13.5px;margin:0 0 4px;font-weight:600}
+#tip dl{display:grid;grid-template-columns:auto auto;gap:1px 10px;margin:0;font-family:var(--mono);
+  font-size:11px;font-variant-numeric:tabular-nums}
+#tip dt{color:var(--ink-soft)} #tip dd{margin:0;text-align:right}
+#tip .warn{color:var(--warn);font-family:var(--sans);font-size:11px;margin-top:5px}
+
+/* recipes */
+.rec{border-top:1px solid var(--rule-soft)}
+.rec>summary{padding:11px 14px;cursor:pointer;list-style:none;display:flex;gap:10px;
+  align-items:baseline;justify-content:space-between}
+.rec>summary::-webkit-details-marker{display:none}
+.rec>summary:hover{background:var(--card-2)}
+.rec .rname{font-family:var(--serif);font-size:15px;font-weight:600}
+.rec .rmeta{font-family:var(--mono);font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.rec .rnote{font-size:11.5px;color:var(--ink-soft);padding:0 14px 8px;max-width:80ch}
+.chk{display:grid;grid-template-columns:22px 1fr 62px 44px 62px;gap:8px;align-items:center;
+  padding:3px 14px;font-size:12.5px;border-top:1px solid var(--rule-soft)}
+.chk:hover{background:var(--card-2)}
+.chk input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.chk .from,.chk .to{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;text-align:right}
+.chk .to{font-weight:600;color:var(--accent)}
+.chk .arrow{text-align:center;color:var(--ink-faint);font-size:11px}
+.chk.done .lbl,.chk.done .from{opacity:.45;text-decoration:line-through}
+.dept-h{padding:8px 14px 3px;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:600}
+.outcomes{display:flex;gap:14px;flex-wrap:wrap;padding:8px 14px 12px;font-family:var(--mono);
+  font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.outcomes b{color:var(--ink);font-weight:600}
+footer{max-width:1220px;margin:22px auto 0;padding:14px 20px 0;border-top:1px solid var(--rule);
+  font-size:11.5px;color:var(--ink-faint);max-width:82ch}
+@media(max-width:760px){
+  .r{grid-template-columns:150px 1fr 66px}
+  .r .cost{display:none}
+  .chk{grid-template-columns:22px 1fr 52px 30px 52px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="masthead">
+  <div class="mast-in">
+    <div class="brand">
+      <div class="eyebrow">Companion to the Policy Bench</div>
+      <h1>Democracy 3 Policy Atlas</h1>
+      <p class="sub">What every policy buys, per dollar, measured at equilibrium rather than from its
+      own effect list &mdash; then the recipes to type back into the Bench. Ranked against one outcome at a
+      time, because a policy that is excellent for health can be poor for jobs.</p>
+    </div>
+    <div class="mast-tools">
+      <button class="btn" id="theme">Theme</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="panel">
+    <header>
+      <h2>What buys this outcome?</h2>
+      <span class="hint">every policy nudged, the whole network re-solved</span>
+    </header>
+    <div class="controls">
+      <div class="ctl"><label for="outcome">Outcome</label>
+        <select id="outcome"></select></div>
+      <div class="ctl"><label>Rank by</label>
+        <div class="seg" id="metric">
+          <button data-m="eff" aria-pressed="true">Per $Bn</button>
+          <button data-m="tot" aria-pressed="false">Total effect</button>
+        </div></div>
+      <div class="ctl"><label>Show</label>
+        <div class="seg" id="scope">
+          <button data-s="20" aria-pressed="true">Top 20</button>
+          <button data-s="0" aria-pressed="false">All</button>
+        </div></div>
+      <div class="ctl"><label for="find">Filter</label>
+        <input type="search" id="find" placeholder="policy name&hellip;"></div>
+    </div>
+    <div class="legend">
+      <span class="key"><i class="sw h"></i> improves it</span>
+      <span class="key"><i class="sw x"></i> makes it worse</span>
+      <span class="key"><i class="tickkey"></i> where the policy&rsquo;s <b>own</b> effect ends &mdash;
+        bar beyond it is the network</span>
+      <span class="key"><span class="flag">CRISIS</span> flips a crisis: a step, not a rate</span>
+    </div>
+    <div class="rows" id="rows"></div>
+    <div class="note" id="explain"></div>
+  </div>
+
+  <div class="panel">
+    <header><h2>Recipes</h2>
+      <span class="hint">tick them off as you enter them in the Bench</span></header>
+    <div id="recipes"></div>
+    <div class="note"><b>How to use one.</b> Open the Bench, hit <em>Reset to US start</em>, then set each
+    policy below to its target. Only policies that <em>differ</em> from the US start are listed &mdash;
+    everything omitted stays where it starts. Ticks are remembered in this browser. The outcome figures
+    are what the solver predicts; the Bench should reproduce them once every row is set.</div>
+  </div>
+</div>
+
+<footer>
+  Effects are measured by perturbing each policy from the US start (economy at its long-run average,
+  crises free to move), re-solving the whole 1,149-edge network, and recording the change in all 40
+  outcomes &mdash; not by reading the policy&rsquo;s own effect list. That distinction is not academic:
+  Healthcare Vouchers has <em>no</em> edge to Health and still moves it +0.030, entirely through
+  <span style="font-family:var(--mono)">PrivateHealthcare</span>. Per-dollar figures use the budget's
+  grounded anchors; policies that improve an outcome <em>and</em> the balance are shown as free rather
+  than given a meaningless ratio.
+</footer>
+
+<div id="tip" role="tooltip"></div>
+
+<script type="application/json" id="eff">__EFFICIENCY_JSON__</script>
+<script type="application/json" id="rec">__RECIPES_JSON__</script>
+<script>
+(function(){
+"use strict";
+const E = JSON.parse(document.getElementById("eff").textContent);
+const RECIPES = JSON.parse(document.getElementById("rec").textContent);
+const OUT = E.outcomes, POL = E.policies;
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,
+  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let outcome = "Unemployment", metric = "eff", limit = 20, query = "";
+if (!OUT[outcome]) outcome = Object.keys(OUT)[0];
+
+/* ---- outcome picker, grouped by zone ---- */
+const sel = document.getElementById("outcome");
+const zones = {};
+for (const k in OUT){ (zones[OUT[k].zone || "Other"] ||= []).push(k); }
+sel.innerHTML = Object.keys(zones).sort().map(z =>
+  '<optgroup label="'+esc(z)+'">' + zones[z]
+    .sort((a,b)=>OUT[a].gui.localeCompare(OUT[b].gui))
+    .map(k=>'<option value="'+esc(k)+'"'+(k===outcome?" selected":"")+'>'+esc(OUT[k].gui)+'</option>')
+    .join("") + '</optgroup>').join("");
+
+/* improvement sign: HIGHBAD outcomes improve by going down. UNKNOWN has no direction. */
+function dirOf(k){ const e = OUT[k].emotion; return e==="HIGHBAD" ? -1 : e==="HIGHGOOD" ? 1 : 0; }
+
+function build(){
+  const sign = dirOf(outcome), unknown = sign === 0;
+  const rows = [];
+  for (const id in POL){
+    const p = POL[id], c = p.cells[outcome];
+    if (!c) continue;
+    const total = c[0], direct = c[1];
+    const imp = unknown ? total : total * sign;        // positive = better
+    const impD = unknown ? direct : direct * sign;
+    if (Math.abs(imp) < 1e-5) continue;
+    const spend = p.dbal < 0 ? -p.dbal : 0;            // $Bn it costs; 0 => pays for itself
+    const free = p.dbal >= 0;
+    const eff = spend > 0.05 ? imp / spend * 100 : null;   // per $100Bn
+    rows.push({id, gui:p.gui, dept:p.dept, imp, impD, spend, free, eff,
+               flipped:p.flipped||[], from:p.from, to:p.to, dbal:p.dbal, total, direct});
+  }
+  const q = query.trim().toLowerCase();
+  let list = q ? rows.filter(r=>r.gui.toLowerCase().includes(q)) : rows;
+
+  if (metric === "eff"){
+    const freeR = list.filter(r=>r.free && r.imp>0).sort((a,b)=>b.imp-a.imp);
+    const paid  = list.filter(r=>!r.free && r.eff!=null).sort((a,b)=>b.eff-a.eff);
+    render([["Free — improves it and pays for itself (ranked by size)", freeR, "imp"],
+            ["Bought — improvement per $100Bn spent", paid, "eff"]], unknown);
+  } else {
+    list = list.slice().sort((a,b)=>b.imp-a.imp);
+    render([[null, list, "imp"]], unknown);
+  }
+}
+
+function render(bands, unknown){
+  const el = document.getElementById("rows");
+  let html = "", any = false;
+  for (const [title, arr0, key] of bands){
+    let arr = arr0;
+    if (limit) arr = arr.slice(0, limit);
+    if (!arr.length) continue;
+    any = true;
+    const max = Math.max(...arr.map(r=>Math.abs(r[key])), 1e-9);
+    const anyNeg = arr.some(r=>r[key] < 0);
+    const zero = anyNeg ? 50 : 0;                     // % position of the zero line
+    const span = anyNeg ? 50 : 100;
+    if (title) html += '<div class="band">'+esc(title)+'</div>';
+    for (const r of arr){
+      const v = r[key], w = Math.abs(v)/max*span, pos = v >= 0;
+      const left = pos ? zero : zero - w;
+      // the direct-effect tick, drawn on the same scale as the bar it annotates
+      let tick = "";
+      if (key === "imp" && Math.abs(r.impD) > 1e-5){
+        const tw = Math.min(100, Math.abs(r.impD)/max*span);
+        const tl = r.impD >= 0 ? zero + tw : zero - tw;
+        tick = '<i class="tick" style="left:'+tl+'%"></i>';
+      }
+      const val = key === "eff" ? r.eff.toFixed(3) : (v>=0?"+":"") + v.toFixed(3);
+      const cost = r.free ? '<span class="free">free</span>'
+                 : "$" + r.spend.toFixed(0) + "B";
+      html += '<div class="r" data-id="'+esc(r.id)+'" tabindex="0">'
+        + '<span class="nm"><span class="dept">'+esc(r.dept)+'</span>'+esc(r.gui)
+        +   (r.flipped.length?'<span class="flag">CRISIS</span>':"") + '</span>'
+        + '<span class="plot">' + (anyNeg?'<i class="axis0" style="left:'+zero+'%"></i>':"")
+        +   '<i class="bar '+(pos?"h":"x")+'" style="left:'+left+'%;width:'+w+'%"></i>'+tick+'</span>'
+        + '<span class="num">'+val+'</span>'
+        + '<span class="cost">'+cost+'</span></div>';
+    }
+  }
+  el.innerHTML = any ? html : '<div class="empty">Nothing moves this outcome measurably.</div>';
+
+  const o = OUT[outcome];
+  const dirTxt = unknown
+    ? "The shipped data flags this outcome <b>UNKNOWN</b> — it says neither that high is good nor that "
+      + "high is bad — so bars show the raw direction of change and no judgement is applied."
+    : (o.emotion === "HIGHBAD"
+        ? "<b>Lower is better</b> for this outcome, so a blue bar means the policy drives it <em>down</em>."
+        : "<b>Higher is better</b> for this outcome, so a blue bar means the policy drives it <em>up</em>.");
+  document.getElementById("explain").innerHTML =
+    dirTxt + " Baseline at the US start: <b>" + o.base.toFixed(3) + "</b>. Each policy was moved by "
+    + E.meta.step + " and the whole network re-solved; the tick marks how much of the result is the "
+    + "policy&rsquo;s own edge, so a bar much longer than its tick is a policy working through the network.";
+}
+
+/* ---- tooltip ---- */
+const tip = document.getElementById("tip");
+function showTip(e, id){
+  const p = POL[id], c = p.cells[outcome]; if (!c) return;
+  const o = OUT[outcome], sign = dirOf(outcome);
+  const total = c[0], direct = c[1], indirect = total - direct;
+  const better = sign === 0 ? null : (total*sign > 0);
+  tip.innerHTML = '<h4>'+esc(p.gui)+'</h4>'
+    + '<dl>'
+    + '<dt>setting</dt><dd>'+p.from.toFixed(2)+' &rarr; '+p.to.toFixed(2)+'</dd>'
+    + '<dt>'+esc(o.gui)+'</dt><dd>'+(total>=0?"+":"")+total.toFixed(4)+'</dd>'
+    + '<dt>&nbsp;&nbsp;its own edge</dt><dd>'+(direct>=0?"+":"")+direct.toFixed(4)+'</dd>'
+    + '<dt>&nbsp;&nbsp;via the network</dt><dd>'+(indirect>=0?"+":"")+indirect.toFixed(4)+'</dd>'
+    + '<dt>budget</dt><dd>'+(p.dbal>=0?"+":"")+'$'+p.dbal.toFixed(0)+'Bn</dd>'
+    + '</dl>'
+    + (better===null ? '<div class="warn">This outcome has no good/bad flag in the data.</div>' : "")
+    + (p.flipped.length ? '<div class="warn">Flips a crisis: '+esc(p.flipped.join(", "))
+        + '. That is a threshold being crossed, so the number is a step, not a rate — it will not '
+        + 'scale if you move the slider further.</div>' : "");
+  tip.style.display = "block";
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+  tip.style.left = x+"px"; tip.style.top = y+"px";
+}
+const rowsEl = document.getElementById("rows");
+rowsEl.addEventListener("mousemove", e=>{
+  const row = e.target.closest(".r");
+  if (!row){ tip.style.display="none"; return; }
+  showTip(e, row.getAttribute("data-id"));
+});
+rowsEl.addEventListener("mouseleave", ()=>{ tip.style.display="none"; });
+
+/* ---- recipes ---- */
+function loadTicks(){
+  try { return JSON.parse(localStorage.getItem("d3atlas.ticks") || "{}"); } catch(_) { return {}; }
+}
+function saveTicks(t){ try { localStorage.setItem("d3atlas.ticks", JSON.stringify(t)); } catch(_){} }
+let ticks = loadTicks();
+
+function renderRecipes(){
+  const el = document.getElementById("recipes");
+  if (!RECIPES || !RECIPES.length){
+    el.innerHTML = '<div class="empty">No recipes bundled in this build.</div>'; return;
+  }
+  el.innerHTML = RECIPES.map((r, ri)=>{
+    const changes = Object.entries(r.policies)
+      .filter(([id,v]) => POL[id] && Math.abs(v - POL[id].from) > 0.005)
+      .map(([id,v]) => ({id, v, from: POL[id].from, gui: POL[id].gui, dept: POL[id].dept}))
+      .sort((a,b)=> a.dept.localeCompare(b.dept) || a.gui.localeCompare(b.gui));
+    const byDept = {};
+    for (const c of changes) (byDept[c.dept] ||= []).push(c);
+    const oc = r.outcomes ? Object.entries(r.outcomes).map(([k,v])=>
+      (OUT[k]?OUT[k].gui:k)+" <b>"+v.toFixed(3)+"</b>").join("") : "";
+    const body = Object.keys(byDept).sort().map(d =>
+      '<div class="dept-h">'+esc(d)+'</div>' + byDept[d].map(c=>{
+        const id = ri+"|"+c.id, on = !!ticks[id];
+        return '<label class="chk'+(on?" done":"")+'" data-k="'+esc(id)+'">'
+          + '<input type="checkbox"'+(on?" checked":"")+'>'
+          + '<span class="lbl">'+esc(c.gui)+'</span>'
+          + '<span class="from">'+c.from.toFixed(2)+'</span>'
+          + '<span class="arrow">&rarr;</span>'
+          + '<span class="to">'+c.v.toFixed(2)+'</span></label>';
+      }).join("")).join("");
+    const ob = r.objective || {};
+    return '<details class="rec"'+(ri===0?" open":"")+'>'
+      + '<summary><span class="rname">'+esc(r.label)+'</span>'
+      +   '<span class="rmeta">'+changes.length+' changes &middot; spend $'
+      +   (ob.spend!=null?ob.spend.toFixed(0):"?")+'Bn &middot; balance '
+      +   (ob.balance!=null?((ob.balance>=0?"+":"")+"$"+ob.balance.toFixed(0)+"Bn"):"?")+'</span></summary>'
+      + (r.note?'<div class="rnote">'+esc(r.note)+'</div>':"")
+      + (oc?'<div class="outcomes">'+oc.replace(/\)([A-Z])/g,") $1")+'</div>':"")
+      + body + '</details>';
+  }).join("");
+}
+document.getElementById("recipes").addEventListener("change", e=>{
+  const lab = e.target.closest(".chk"); if (!lab) return;
+  const k = lab.getAttribute("data-k");
+  ticks[k] = e.target.checked; saveTicks(ticks);
+  lab.classList.toggle("done", e.target.checked);
+});
+
+/* ---- wiring ---- */
+sel.addEventListener("change", e=>{ outcome = e.target.value; build(); });
+document.getElementById("metric").addEventListener("click", e=>{
+  const b = e.target.closest("[data-m]"); if (!b) return;
+  metric = b.getAttribute("data-m");
+  for (const x of e.currentTarget.querySelectorAll("button"))
+    x.setAttribute("aria-pressed", String(x === b));
+  build();
+});
+document.getElementById("scope").addEventListener("click", e=>{
+  const b = e.target.closest("[data-s]"); if (!b) return;
+  limit = parseInt(b.getAttribute("data-s"), 10);
+  for (const x of e.currentTarget.querySelectorAll("button"))
+    x.setAttribute("aria-pressed", String(x === b));
+  build();
+});
+document.getElementById("find").addEventListener("input", e=>{ query = e.target.value; build(); });
+const root = document.documentElement;
+document.getElementById("theme").addEventListener("click", ()=>{
+  const now = root.getAttribute("data-theme");
+  const dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.setAttribute("data-theme", dark ? "light" : "dark");
+});
+
+build(); renderRecipes();
+})();
+</script>

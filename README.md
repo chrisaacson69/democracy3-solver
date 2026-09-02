@@ -104,9 +104,11 @@ notes/grammar.md   the CSV grammar, grounded in the shipped data
 notes/scope.md     the agreed problem statement
 notes/layer2.md    the two optimizers: encoding, what is approximate, how to read the results
 notes/findings.md  what the model actually says - reproducible comparisons off the bench
-web/               browser bench: template + optimiser-derived scenarios
+web/               browser artifacts: the Bench (explorer.template.html) and the Atlas
+                   (atlas.template.html) + their exported data
 scripts/           runnable drivers (solve_us, frontier, optimize_*, milp_us, economy_sweep,
                    export_scenarios, export_web_model, build_explorer,
-                   cost_effectiveness - outcome per $Bn, ranked, per target)
+                   cost_effectiveness - outcome per $Bn, ranked, per target,
+                   tax_frontier, export_efficiency, build_atlas)
 tests/             formula, PWL, and MILP-vs-solver agreement tests
 ```
