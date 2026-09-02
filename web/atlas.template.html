@@ -209,7 +209,21 @@ footer{max-width:1220px;margin:22px auto 0;padding:14px 20px 0;border-top:1px so
 
   <div class="panel">
     <header><h2>Recipes</h2>
-      <span class="hint">tick them off as you enter them in the Bench</span></header>
+      <span class="hint">transcription aids &mdash; not derived from the chart above</span></header>
+    <div class="note" style="border-top:0;border-bottom:1px solid var(--rule)">
+      <b>What this panel is.</b> A saved configuration the solver found, written out as the list of
+      sliders to move so you can rebuild it in the Bench. The ticks track your place while you type;
+      they change nothing. <b>It is not a shortlist of good policies</b> &mdash; that is the chart above.
+      <br><br>
+      <b>Why a policy can top the chart and be absent here.</b> The chart ranks the next move
+      <em>from the US start</em>; a recipe is a state a long way from it, and marginal value does not
+      survive the journey. Internet Tax is the best free unemployment lever from the US start
+      (<span style="font-family:var(--mono)">+0.014</span> and it raises money), is worth
+      <span style="font-family:var(--mono)">exactly 0.000</span> once you are at
+      &ldquo;Same taxes, spent well&rdquo;, and is <span style="font-family:var(--mono)">&minus;0.011</span>
+      at &ldquo;Two fifths of the taxes&rdquo;. Both panels are right; they answer questions about
+      different states.
+    </div>
     <div id="recipes"></div>
     <div class="note"><b>How to use one.</b> Open the Bench, hit <em>Reset to US start</em>, then set each
     policy to its target. Only policies that <em>differ</em> from the US start are listed &mdash;

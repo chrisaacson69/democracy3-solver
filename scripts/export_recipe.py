@@ -100,7 +100,12 @@ def main() -> None:
     csv = calibrate(model, scen.policies, dict(save.sim_values), 1191.0, 1288.0)
     obj = make_objective({"Equality": 1.0, "Health": 1.0, "GDP": 1.0,
                           "PovertyRate": -1.0, "Unemployment": -1.0, "CrimeRate": -1.0})
-    full = dict(scen.policies); full.update(vec)
+    # Round FIRST, then evaluate. A checklist can only ask for two decimals, so the numbers it
+    # advertises have to be the numbers the rounded vector actually produces. Skipping this shipped a
+    # recipe claiming CrimeRate 0.000 whose own checklist delivers 0.104 — rounding 74 sliders pushed
+    # the state across a crisis threshold, which is a step rather than a rounding error.
+    full = dict(scen.policies)
+    full.update({n: round(float(v), 2) for n, v in vec.items()})
     o, b, eq = evaluate(model, full, scen.exogenous, obj, ab, csv.cost_k, csv.income_k,
                         scen.ref_state, scen.ref_active, False)
     inc = sum(_income(n, v, ab, model, eq.values, csv.income_k) for n, v in full.items())
@@ -115,7 +120,8 @@ def main() -> None:
                "objective": {"value": round(o, 4), "income": round(inc, 1),
                              "spend": round(cost, 1), "balance": round(inc - cost, 1)},
                "outcomes": {k: round(eq.values[k], 4) for k in SHOW},
-               "policies": {n: round(v, 2) for n, v in full.items()}}
+               "policies": {n: round(v, 2) for n, v in full.items()},
+               "roundedEval": True}
         out = Path(args.out) if args.out else None
         if out and args.append and out.exists():
             lst = json.loads(out.read_text(encoding="utf-8"))

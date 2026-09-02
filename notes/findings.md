@@ -649,3 +649,43 @@ Religious_freq,0.33,1,0)` and eight more for the USA). Those shape the initial v
 solver currently takes from the savegame instead. Reading them, plus the mission budget constants,
 is what would make the country a dropdown rather than a rebuild.
 
+## Marginal value does not survive the journey
+
+Chris noticed that Internet Tax tops the Atlas as the best *free* unemployment lever and does not
+appear in either recipe, and asked what the recipe panel was for. Checking it produced a better answer
+than the question expected, and a bug.
+
+**Internet Tax, +0.15, evaluated from three different states:**
+
+| starting state | change in X | balance |
+|---|---|---|
+| US start | **+0.0139** | +$11Bn |
+| Same taxes, spent well | **0.0000** | +$12Bn |
+| Two fifths of the taxes | **−0.0114** | +$15Bn |
+
+The best free unemployment lever *from where the US actually is* is worth exactly nothing at one
+optimum and is actively harmful at another. Nothing is inconsistent: the efficiency matrix ranks **the
+next move from the US start**, and a recipe is a state 65–74 policy changes away. A ranking is a
+statement about a point, not a property of a policy.
+
+This is the same lesson as average-vs-marginal value from the cost-effectiveness work, arriving from a
+third direction, and it is the honest limit of the Atlas: **it tells you what to do next from here, not
+what belongs in a finished configuration.**
+
+### And a defect: the recipes advertised numbers their own checklist could not produce
+
+A checklist can only ask for two decimals, but the recipes were reporting the outcomes of the
+*unrounded* optimiser vector. For "Same taxes, spent well" the drift was harmless (X +1.9126 →
++1.9177). For "Two fifths of the taxes" it was not:
+
+| | advertised | what the checklist actually delivers |
+|---|---|---|
+| X | +1.6252 | **+1.3424** |
+| CrimeRate | 0.000 | **0.104** |
+| Health | 0.880 | **0.734** |
+
+Rounding 74 sliders to two decimals pushed the state **across a crisis threshold** — a step, not a
+rounding error, and exactly the discontinuity the Atlas flags elsewhere. Recipes are now evaluated
+*after* rounding, so the advertised numbers are the ones you get by following the list. Anything that
+tells you what to type has to be scored on what you would type.
+
