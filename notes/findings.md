@@ -844,3 +844,46 @@ fix is not a better step rule, it is a better place to stand.
 So the play heuristic is not a preference and not merely a search aid; it is **a strategy that finds
 strictly better end states.** Worth making the default recommendation: solve crises, then optimise.
 
+## Crises priced the same way policies are (`scripts/crisis_value.py`)
+
+Generalising the cost-effectiveness idea from policies to crises. Two measured numbers each: **worth**
+(force it inactive, hold everything else, re-solve, take the change in the welfare basket) and **cost**
+(the cheapest single policy lever that still has enough slider range to push its value below the stop
+trigger). At the US start:
+
+| crisis | kind | worth X | est cost | per $100Bn | cheapest lever |
+|---|---|---|---|---|---|
+| Skills Shortage | harmful | +0.0109 | **free** | — | Internet Tax |
+| **Ghettos** | harmful | +0.0849 | **$3Bn** | **2.92** | Citizenship Tests |
+| Doctors Strike | harmful | **+0.2695** | $177Bn | 0.15 | Healthcare Vouchers |
+| Pollution | harmful | +0.2031 | $200Bn | 0.10 | Adult Education Subsidies |
+| Antisocial Behaviour | harmful | +0.0112 | $17Bn | 0.07 | Community Policing |
+| Technological Advantage | **GOOD** | −0.0218 | n/a | — | no single lever |
+| Alcohol Abuse | harmful | +0.1142 | n/a | — | no single lever |
+| **Asthma Epidemic** | harmful | **−0.0029** | n/a | — | no single lever |
+| Rail Strike | harmful | +0.0103 | n/a | — | no single lever |
+
+**Yes, some cost more to fix than they return — and one is worth less than nothing.** Clearing the
+Asthma Epidemic makes the country *slightly worse* (−0.0029). Technological Advantage is the same
+number for the honest reason that it is a beneficial situation.
+
+**And the value-for-money order is nothing like the worth order.** By raw worth: Doctors Strike (0.27)
+> Pollution (0.20) > Alcohol Abuse (0.11) > Ghettos (0.08). By return per dollar: **Ghettos (2.92) is
+19× better value than Doctors Strike (0.15)**, despite being worth a third as much — $3Bn against
+$177Bn. This is exactly the inversion the policy rankings found for military spending and pensions,
+now reproduced one level up. *"Fix the worst first" and "fix the best-value first" are different
+instructions, and only the second one is about efficiency.*
+
+Four crises have **no single lever with the range to clear them at any price** — they need a portfolio,
+which is what the two-stage optimiser finds and this first-order ranking cannot.
+
+**Limits, stated because the numbers look more precise than they are.** The cost is a linear
+extrapolation from a 0.15 perturbation out to the full distance; it uses the best *single* lever rather
+than the best combination; and clearing one crisis can clear or cause others, which this does not
+model. It ranks what to look at. The optimiser makes the plan.
+
+A first draft of this ranking was useless in an instructive way: every crisis came back "free", because
+the cost test only asked whether a lever was cheap *per dollar* and never whether it had enough slider
+left to close the gap. A rate is not a plan — an exchange rate with no quantity attached will always
+say everything is affordable.
+

@@ -110,6 +110,7 @@ scripts/           runnable drivers (solve_us, frontier, optimize_*, milp_us, ec
                    export_scenarios, export_web_model, build_explorer,
                    cost_effectiveness - outcome per $Bn, ranked, per target,
                    tax_frontier, export_efficiency, build_atlas,
-                   export_recipe - any policy vector as a Bench checklist)
+                   export_recipe - any policy vector as a Bench checklist,
+                   crisis_value - what each crisis is worth fixing, per $Bn)
 tests/             formula, PWL, and MILP-vs-solver agreement tests
 ```
