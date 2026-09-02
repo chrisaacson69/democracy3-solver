@@ -595,3 +595,57 @@ direct route is one strong coefficient while the growth route is a chain of weak
 GDP-raising policy exceeds +0.08. Whether the chain can beat direct hiring at equal cost is the next
 thing worth measuring.
 
+## Is the model generic? Yes — and we were running the USA slightly wrong
+
+The question was whether a country is needed at all, given the CSVs work on a relative scale. The
+answer is in three parts.
+
+**The effect network is country-agnostic, and the feedback loops need no absolutes.** A single
+`data/simulation/` serves all six countries: `simulation.csv`, `policies.csv`, `votertypes.csv` and
+`situations.csv` exist once. The 1,149 edges, 40 outcomes and 36 crises are identical everywhere, and
+the equilibrium solve runs entirely in the normalised [0,1] space the CSVs define — **no absolute
+quantity enters it**. Absolutes (population, GDP range, income bands, `wealth_mod`) are needed only by
+the *budget* layer, to turn slider positions into dollars. So a country is a **starting condition plus
+a small patch**, not a different model, and a country dropdown is a real and cheap prospect.
+
+**But there is a patch, and we were ignoring it.** `missions/<country>/overrides/*.ini` edits the
+network per country:
+
+| country | overrides |
+|---|---|
+| usa | deletes `HandgunLaws → ViolentCrimeRate`; adds `LuxuryGoodsTax` and `MansionTax` → `MiddleIncome` |
+| uk | deletes `Gambling → Religious` |
+| france | 6, incl. `StateSchools → TeachersStrike` and `StateHealthService → DoctorsStrike` |
+| germany | 2 | canada, australia | none |
+
+Loading the shared CSVs alone therefore has **handgun laws cutting violent crime in a US game whose
+own scenario deletes that edge**. `loader.load_overrides` now applies them and
+`loader.load_country(sim_dir, "usa")` is the front door.
+
+**How much did it matter?** At the US start, *nothing* — X is identical to four decimals. The reason is
+worth keeping: `ViolentCrimeRate` sits clamped at its floor, so the deleted edge was inert, and both
+`LuxuryGoodsTax` and `MansionTax` are switched off, so their added edges contributed zero. The bug was
+real and its baseline impact was nil.
+
+It bites the moment you enact those taxes — **which the optimiser did**, recommending `MansionTax → 1.00`:
+
+| | MiddleIncome |
+|---|---|
+| shared CSVs only | −0.040 |
+| + USA overrides | **−0.170** |
+
+A 4× understatement of what that recommendation costs middle incomes. The lesson generalises: a defect
+that measures zero at the baseline is not harmless, it is *dormant*, and an optimiser's job is to walk
+to exactly the places where dormant things wake up.
+
+France ships a **7th data typo** on top of the six in the CSVs: `RailSubsidies → Rail Strike` has the
+equation `0-(0.8*x))`, an unmatched paren. It is surfaced as a problem and the original edge survives —
+never fabricated, never silently dropped.
+
+### Still country-specific and still unread
+
+`missions/<country>/scripts/*.txt` sets starting voter biases (`CreateGrudge(USA,_hidden_,
+Religious_freq,0.33,1,0)` and eight more for the USA). Those shape the initial voter state, which the
+solver currently takes from the savegame instead. Reading them, plus the mission budget constants,
+is what would make the country a dropdown rather than a rebuild.
+

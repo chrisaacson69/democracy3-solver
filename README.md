@@ -109,6 +109,7 @@ web/               browser artifacts: the Bench (explorer.template.html) and the
 scripts/           runnable drivers (solve_us, frontier, optimize_*, milp_us, economy_sweep,
                    export_scenarios, export_web_model, build_explorer,
                    cost_effectiveness - outcome per $Bn, ranked, per target,
-                   tax_frontier, export_efficiency, build_atlas)
+                   tax_frontier, export_efficiency, build_atlas,
+                   export_recipe - any policy vector as a Bench checklist)
 tests/             formula, PWL, and MILP-vs-solver agreement tests
 ```

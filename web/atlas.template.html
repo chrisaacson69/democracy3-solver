@@ -137,7 +137,13 @@ select,input[type=search]{padding:6px 9px;border:1px solid var(--rule);border-ra
 .chk .from,.chk .to{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;text-align:right}
 .chk .to{font-weight:600;color:var(--accent)}
 .chk .arrow{text-align:center;color:var(--ink-faint);font-size:11px}
-.chk.done .lbl,.chk.done .from{opacity:.45;text-decoration:line-through}
+.chk.done{background:var(--good-bg)}
+.chk.done .lbl{opacity:.5;text-decoration:line-through}
+.chk.done .from,.chk.done .arrow{opacity:.4}
+.chk.done .to{opacity:.6;text-decoration:line-through}
+.prog{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
+  font-variant-numeric:tabular-nums;margin-left:auto;padding-right:10px}
+.prog.done{color:var(--good);font-weight:600}
 .dept-h{padding:8px 14px 3px;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--ink-faint);font-weight:600}
 .outcomes{display:flex;gap:14px;flex-wrap:wrap;padding:8px 14px 12px;font-family:var(--mono);
@@ -206,9 +212,13 @@ footer{max-width:1220px;margin:22px auto 0;padding:14px 20px 0;border-top:1px so
       <span class="hint">tick them off as you enter them in the Bench</span></header>
     <div id="recipes"></div>
     <div class="note"><b>How to use one.</b> Open the Bench, hit <em>Reset to US start</em>, then set each
-    policy below to its target. Only policies that <em>differ</em> from the US start are listed &mdash;
-    everything omitted stays where it starts. Ticks are remembered in this browser. The outcome figures
-    are what the solver predicts; the Bench should reproduce them once every row is set.</div>
+    policy to its target. Only policies that <em>differ</em> from the US start are listed &mdash;
+    everything omitted stays where it starts. Ticking a row strikes it and advances the counter in the
+    header, so you can stop halfway and come back; ticks are remembered in this browser. The outcome
+    figures are what the solver predicts, so the Bench should reproduce them once every row is set.
+    <b>For any other result</b> &mdash; ancapistan, a frontier optimum, anything computed later &mdash;
+    <span style="font-family:var(--mono)">scripts/export_recipe.py</span> emits the same checklist as
+    Markdown without needing this page rebuilt.</div>
   </div>
 </div>
 
@@ -399,19 +409,47 @@ function renderRecipes(){
     const ob = r.objective || {};
     return '<details class="rec"'+(ri===0?" open":"")+'>'
       + '<summary><span class="rname">'+esc(r.label)+'</span>'
+      +   '<span class="prog" data-prog="'+ri+'"></span>'
       +   '<span class="rmeta">'+changes.length+' changes &middot; spend $'
       +   (ob.spend!=null?ob.spend.toFixed(0):"?")+'Bn &middot; balance '
       +   (ob.balance!=null?((ob.balance>=0?"+":"")+"$"+ob.balance.toFixed(0)+"Bn"):"?")+'</span></summary>'
       + (r.note?'<div class="rnote">'+esc(r.note)+'</div>':"")
       + (oc?'<div class="outcomes">'+oc.replace(/\)([A-Z])/g,") $1")+'</div>':"")
-      + body + '</details>';
+      + body
+      + '<div style="padding:8px 14px"><button class="btn" data-clear="'+ri+'">'
+      +   'Clear ticks for this recipe</button></div>'
+      + '</details>';
   }).join("");
+  updateProgress();
+}
+
+/* the checkbox has to *say* something: how many of this recipe's sliders are entered */
+function updateProgress(){
+  document.querySelectorAll("[data-prog]").forEach(el=>{
+    const ri = el.getAttribute("data-prog");
+    const rows = document.querySelectorAll('.chk[data-k^="'+ri+'|"]');
+    const done = [...rows].filter(r=>r.classList.contains("done")).length;
+    el.textContent = done + " / " + rows.length + " entered";
+    el.classList.toggle("done", rows.length > 0 && done === rows.length);
+  });
 }
 document.getElementById("recipes").addEventListener("change", e=>{
   const lab = e.target.closest(".chk"); if (!lab) return;
   const k = lab.getAttribute("data-k");
   ticks[k] = e.target.checked; saveTicks(ticks);
   lab.classList.toggle("done", e.target.checked);
+  updateProgress();
+});
+document.getElementById("recipes").addEventListener("click", e=>{
+  const b = e.target.closest("[data-clear]"); if (!b) return;
+  e.preventDefault();
+  const ri = b.getAttribute("data-clear");
+  for (const k of Object.keys(ticks)) if (k.startsWith(ri+"|")) delete ticks[k];
+  saveTicks(ticks);
+  document.querySelectorAll('.chk[data-k^="'+ri+'|"]').forEach(r=>{
+    r.classList.remove("done"); const i = r.querySelector("input"); if (i) i.checked = false;
+  });
+  updateProgress();
 });
 
 /* ---- wiring ---- */
