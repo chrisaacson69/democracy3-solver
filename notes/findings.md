@@ -689,3 +689,54 @@ rounding error, and exactly the discontinuity the Atlas flags elsewhere. Recipes
 *after* rounding, so the advertised numbers are the ones you get by following the list. Anything that
 tells you what to type has to be scored on what you would type.
 
+## Clamped outcomes are blind spots, and the optimiser exploits them
+
+Chris: *"the balanced version produces unemployment of 0, crime of 0 yet has black market, ghettos,
+organised crime and tax evasion — that just seemed odd."*
+
+It is odd, and it is not a display artifact. It is a defect in the objective.
+
+At the welfare optimum, `CrimeRate` reports **0.000**. Its unclamped sum is **−0.43** — the policy suite
+drives crime so far past the floor that there is 0.43 of slack below the bound. Meanwhile Organised
+Crime (+0.2225) and Black Market (+0.0756) are actively pushing crime *up*; they are simply buried
+under the overshoot.
+
+So what does the objective gain by clearing them?
+
+| clearing | change in X |
+|---|---|
+| Organised Crime | **−0.00000** |
+| Black Market | **−0.00000** |
+| Tax Evasion | **−0.00000** |
+| Ghettos | +0.00475 |
+
+**Nothing.** `CrimeRate` is pinned at its floor, so removing a crime crisis buys no movement in the one
+channel the objective scores it through. `Equality` is pinned at its ceiling of 1.000, so Ghettos'
+equality damage is invisible for the same reason from the other end. The crises are *free to leave
+running* — not because they are harmless, but because **the metric cannot register them.**
+
+This is the saturation problem from the Layer-2 notes, and it is worse than "the score stops being
+informative". A clamped outcome does not merely stop rewarding improvement; it makes **entire
+categories of damage invisible**, and an optimiser will then park real problems inside the blind spot
+because they are costless there. Every objective built on clamped [0,1] outcomes has this failure mode
+wherever it saturates.
+
+Two consequences worth carrying:
+
+1. **A saturated outcome is a warning, not a victory.** `CrimeRate 0.000` with 0.43 of slack means the
+   spending past the boundary bought nothing and could have gone elsewhere — and that anything whose
+   only channel is crime is now unpriced.
+2. **Chris's playstyle is the right correction.** "Solve the worst crisis first" prices crises directly
+   rather than through a saturable proxy. The principled version is to add an explicit term for active
+   harmful crises to the objective, so they are scored even when their outcome channel is pinned.
+
+### A method note on how this was found
+
+The first reconstruction of `CrimeRate` gave +0.18 against the solver's 0.000 and looked like a solver
+bug. It was a bug in the *analysis script*: `Equilibrium.values` holds endogenous nodes only, so
+`eq.values.get(source, 0.0)` scored every **policy**-sourced edge at x = 0 — silently zeroing exactly
+the crime-reducing policies under investigation. Rebuilding the state the way `solver.py` does
+(exogenous + policies + node values) reproduced −0.4317 → 0.000 exactly. A discrepancy between a
+reconstruction and the thing it reconstructs is evidence about *one* of them, and the reconstruction is
+usually the newer and worse-tested code.
+
