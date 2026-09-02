@@ -31,11 +31,13 @@ import re
 from pathlib import Path
 
 from d3solver import load_model
+from d3solver.loader import load_country
 from d3solver.config import sim_dir
 from d3solver.savegame import load_savegame
 from d3solver.scenario import from_savegame
 
 SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
+COUNTRY = "usa"
 
 _BINOP = {ast.Add: "+", ast.Sub: "-", ast.Mult: "*", ast.Div: "/", ast.Pow: "^"}
 
@@ -121,7 +123,11 @@ def main() -> None:
     args = ap.parse_args()
 
     d = sim_dir()
-    model = load_model(d)
+    # load_country, not load_model: the shared CSVs are country-agnostic, and the USA
+    # deletes HandgunLaws -> ViolentCrimeRate while adding two tax edges onto
+    # MiddleIncome. Shipping the un-overridden network mislabels it as "the USA".
+    model, overrides = load_country(d, COUNTRY)
+    print(f"country={COUNTRY}: {len(overrides)} mission overrides applied")
     save = load_savegame(SAVE)
     scen = from_savegame(save)
 

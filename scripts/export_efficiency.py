@@ -28,6 +28,7 @@ import json
 from pathlib import Path
 
 from d3solver import load_model
+from d3solver.loader import load_country
 from d3solver.budget import anchored_from_save, calibrate
 from d3solver.config import sim_dir
 from d3solver.optimize import _cost, _income, evaluate, make_objective
@@ -35,6 +36,7 @@ from d3solver.savegame import load_savegame
 from d3solver.scenario import anchor_equilibrium, from_savegame
 
 SAVE = Path("tests/fixtures/autosave_usa_turn1.xml")
+COUNTRY = "usa"
 
 
 def main() -> None:
@@ -43,7 +45,8 @@ def main() -> None:
     ap.add_argument("--step", type=float, default=0.15)
     args = ap.parse_args()
 
-    model = load_model(sim_dir())
+    model, overrides = load_country(sim_dir(), COUNTRY)
+    print(f"country={COUNTRY}: {len(overrides)} mission overrides applied")
     save = load_savegame(SAVE)
     scen = from_savegame(save)
     ab = anchored_from_save(save, 1191.0, 1288.0,
