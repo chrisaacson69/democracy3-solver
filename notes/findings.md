@@ -777,3 +777,35 @@ Two consequences:
    The blind objective was not just tolerating crises, it was failing to find anything worth buying —
    more evidence it had stalled on a plateau rather than reached an optimum.
 
+## Freeing the basin helps broad objectives and hurts narrow ones
+
+Re-solving the four objectives with the crises free did not move them all the same way, and the split
+is the informative part.
+
+| | GDP | Unemp | Poverty | Crime | Health | Equality | harmful | balance |
+|---|---|---|---|---|---|---|---|---|
+| **Balanced welfare** | 0.788 → **0.900** | 0.000 | 0.000 | 0.000 | 1.000 | 1.000 | 8 → 9 | $17 → $456Bn |
+| **Growth above all** | 0.800 → **1.000** | 0.788 → **0.540** | 0.314 → **0.225** | 0.000 | 0.753 → **0.915** | 0.204 → **0.348** | 11 → **9** | $1961 → $377Bn |
+| **Equality and poverty** | 0.218 → 0.375 | 0.437 → *0.512* | 0.000 | 0.288 → *0.470* | 0.476 → *0.380* | 1.000 | 11 → 10 | −$356 → $117Bn |
+| **Zero crime at any price** | 0.561 → *0.548* | 0.073 → *0.355* | 0.006 → *0.231* | 0.000 | 0.625 → *0.483* | 0.805 → *0.419* | 6 → **8** | $590 → $429Bn |
+
+**Growth is the clean win**: every single outcome improves and two crises clear. A GDP-only objective
+turns out to buy unemployment, health and equality as by-products, because they all hang off GDP.
+
+**But the two narrow objectives got worse where they were not looking.** Equality and poverty holds
+Equality at 1.000 and Poverty at 0.000 while letting crime rise 0.288 → 0.470 and health fall. Zero
+crime holds Crime at 0.000 while unemployment nearly quintuples and equality falls 0.805 → 0.419.
+
+The mechanism is not mysterious and it is not about crises: **a narrow objective plus more freedom
+equals more collateral damage.** Freezing the basin was accidentally *constraining* those runs. Given
+the extra room, they spent it in the dimensions nobody was scoring. The broad objective has no such
+room — everything it could wreck is already in the basket.
+
+That is also the clearest statement yet of what the equality optimum actually does: it reaches
+Equality 1.000 with GDP at **0.218**. Equality is available on demand if you are willing to level
+down, which is a result to state plainly rather than to celebrate.
+
+**Implication for choosing X:** the number of things in the basket is not a matter of taste. A narrow
+objective does not merely ignore what it omits — it actively pays for its own metric with the omitted
+ones, and the more search freedom it has the more it will.
+
