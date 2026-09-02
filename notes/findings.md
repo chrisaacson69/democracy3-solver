@@ -955,3 +955,34 @@ So the rule is: **clamp the dynamics, score the raw.** Not because the game is w
 because the clamp is a mechanic and the objective is ours. `Equilibrium.raw` now carries it; threading
 it through to the objective callable is the remaining plumbing.
 
+### The slack term is a distance, not a direction
+
+Chris, arriving at this independently while the above was being measured: *"maximizing +1.0 slack is
+boundless and wrong, as much as minimizing -1.0 slack — we get caught in trying to make things happen
+that cannot happen and are unbound."*
+
+That is the specification, and it is symmetric in a way the first framing missed. Scoring raw
+**upward** chases an unreachable ceiling; scoring it **downward** chases an unreachable floor. Both are
+unbounded, and both spend real budget on movement the world cannot register. The failure is not the
+sign — it is treating raw as a *direction* at all.
+
+The target is raw ≈ **the bound itself**. At that point the outcome is maxed and nothing was overpaid
+for it. So the term is a distance:
+
+```
+penalty = eps * |raw - bound|      for each pinned node
+```
+
+which is zero when you have exactly reached the wall, and rises whether you fall short or push through
+it. It restores gradient on the shelf — the thing the crisis price was doing by accident — without
+paying for a wall you have already hit.
+
+Two consequences worth noting for whoever wires it up:
+
+* **It should apply only where the node is pinned.** An interior node's raw *is* its value, so the
+  distance is zero and the term is silently correct there; making it unconditional costs nothing but
+  is easier to reason about if scoped explicitly.
+* **`eps` should be small.** The term is a tie-breaker on a plateau, not a competing objective. Large
+  values would trade real outcomes for tidiness at the boundary — the same over-pricing failure the
+  crisis term showed at lambda 0.40.
+
