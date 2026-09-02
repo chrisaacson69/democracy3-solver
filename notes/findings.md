@@ -926,3 +926,32 @@ bound and redeploys it.
 is the next concrete change, and until it is made, the claim that penalising slack helps is a
 hypothesis with a good mechanism behind it and no measurement.
 
+### The clamp is load-bearing in the dynamics, and optional only in the scoring
+
+Chris: *"even though the game clamps to 0.0->1.0 we don't have to — we find slack that the mechanics
+hid."* Right, with one boundary that has to be drawn precisely, because the clamp does two different
+jobs and only one of them is discardable.
+
+Removing it from the **dynamics** was tested directly:
+
+```
+WITH clamps    -> converged in 53 iterations
+WITHOUT clamps -> did NOT settle in 2000 iterations
+                  Brain Drain +2.18, Vigilante Mobs -1.92, Wealthy -1.69
+```
+
+**The clamp is what makes the fixed point exist.** Downstream nodes read clamped values, so removing
+it lets the feedback run away — and situations go *negative*, which destroys hysteresis outright since
+a trigger comparison on a value of −1.92 is meaningless. The clamp is not a display convention; it is
+the stabiliser.
+
+**But the scoring is a different matter entirely.** The raw pre-clamp total is computed on every
+iteration and then discarded. Reading it changes nothing about the simulation — the network still
+clamps, still converges, still behaves exactly as the game does — and it recovers the information the
+mechanics threw away. That is the slack: **2.03 units of it at the welfare optimum**, invisible to a
+scorer that only sees the clamped value.
+
+So the rule is: **clamp the dynamics, score the raw.** Not because the game is wrong to clamp, but
+because the clamp is a mechanic and the objective is ours. `Equilibrium.raw` now carries it; threading
+it through to the objective callable is the remaining plumbing.
+
