@@ -750,13 +750,20 @@ basket, so the comparison is fair.
 | lambda | welfare X | harmful crises | balance | still running |
 |---|---|---|---|---|
 | 0.00 | +2.898 | 9 | +$458Bn | Pollution, Asthma, Teacher Shortage, Doctors Strike, Brain Drain … |
-| **0.05** | **+3.000** | **4** | −$0Bn | Pollution, Asthma, Rail Strike, Ghettos |
+| 0.05 | +2.857 | 6 | −$0Bn | Teacher Shortage, Doctors Strike, Brain Drain, Tax Evasion … |
 | 0.15 | +2.860 | **1** | −$0Bn | Rail Strike |
 | 0.40 | +2.829 | 2 | −$0Bn | Doctors Strike, Tax Evasion |
 
-**A small crisis price is strictly better on both axes.** At lambda 0.05 the welfare score *rises* from
-+2.898 to +3.000 — the basket's ceiling — while harmful crises more than halve. That is not a
-trade-off being made well; it is a free lunch, and it means the lambda = 0 run was simply stuck.
+> **Corrected 2026-09-02.** The lambda 0.05 row first read *+3.000 with 4 harmful*, and was reported
+> as a free lunch that "strictly dominates". That measurement predated the USA mission overrides, so it
+> was taken on the country-agnostic network. Re-run on the corrected model it is **+2.857 with 6** — a
+> real crisis reduction that costs about 0.04 of X rather than gaining 0.10. **Cheap, not free.** The
+> lesson is narrower than the retraction: a number carried across a model fix is a number that has to
+> be re-measured, not re-quoted.
+
+**A crisis price is cheap and it un-sticks the search.** It costs ~0.04 of X, cuts harmful crises from
+9 to 6, and — the part that is not a matter of taste — stops the optimiser hoarding **$458Bn it never
+spends**, which is the signature of a run that stalled on a plateau rather than reached an optimum.
 
 The reason is the blind spot itself. A clamped outcome gives the optimiser a **flat plateau**: no
 gradient, so nothing to climb. The crisis values still vary there, so pricing them restores a slope in
@@ -808,4 +815,32 @@ down, which is a result to state plainly rather than to celebrate.
 **Implication for choosing X:** the number of things in the basket is not a matter of taste. A narrow
 objective does not merely ignore what it omits — it actively pays for its own metric with the omitted
 ones, and the more search freedom it has the more it will.
+
+## Crisis-first wins: it is a better starting basin, not just a better preference
+
+Chris: *"fix the crisis, and maybe we solve the residual issues much cleaner."* Tested directly, on the
+override-corrected USA, every run scored on the same unmodified welfare basket:
+
+| approach | welfare X | harmful crises | balance |
+|---|---|---|---|
+| one stage — welfare only | +2.898 | 9 | +$458Bn |
+| one stage — welfare + crisis price 0.05 | +2.857 | 6 | −$0Bn |
+| **two stage — crises first, then welfare** | **+2.979** | **4** | +$3Bn |
+
+**Two-stage dominates both one-stage variants on both axes**: more welfare than optimising welfare
+directly, and fewer than half the crises.
+
+Stage 1 alone is the striking part. An objective scoring **nothing but crisis removal** — blind to GDP,
+health, equality, poverty and crime — still reaches **X = +2.127**, about 73% of what the
+welfare-maximiser finds, on a balanced budget with 2 harmful crises left. The outcomes come along for
+free because the crises are what was holding them down.
+
+The mechanism is the one this project keeps rediscovering: **the welfare optimiser from the US start is
+stuck in a basin gated by crises.** Clearing them first moves the search to a different basin, and from
+there the same optimiser climbs higher than it ever could directly. It is the same shape as the
+trust-region merit function and the crisis-price plateau — when the objective offers no gradient, the
+fix is not a better step rule, it is a better place to stand.
+
+So the play heuristic is not a preference and not merely a search aid; it is **a strategy that finds
+strictly better end states.** Worth making the default recommendation: solve crises, then optimise.
 
