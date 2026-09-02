@@ -740,3 +740,40 @@ the crime-reducing policies under investigation. Rebuilding the state the way `s
 reconstruction and the thing it reconstructs is evidence about *one* of them, and the reconstruction is
 usually the newer and worse-tested code.
 
+## Pricing crises directly is free — and it is a better *search*, not just a preference
+
+The blind-spot finding above says the objective cannot see crises whose outcome channel is clamped.
+The obvious correction is to price them directly: add `-lambda x value` for each of the 34 harmful
+situations, leaving the welfare basket untouched. Every row below is scored on the **original**
+basket, so the comparison is fair.
+
+| lambda | welfare X | harmful crises | balance | still running |
+|---|---|---|---|---|
+| 0.00 | +2.898 | 9 | +$458Bn | Pollution, Asthma, Teacher Shortage, Doctors Strike, Brain Drain … |
+| **0.05** | **+3.000** | **4** | −$0Bn | Pollution, Asthma, Rail Strike, Ghettos |
+| 0.15 | +2.860 | **1** | −$0Bn | Rail Strike |
+| 0.40 | +2.829 | 2 | −$0Bn | Doctors Strike, Tax Evasion |
+
+**A small crisis price is strictly better on both axes.** At lambda 0.05 the welfare score *rises* from
++2.898 to +3.000 — the basket's ceiling — while harmful crises more than halve. That is not a
+trade-off being made well; it is a free lunch, and it means the lambda = 0 run was simply stuck.
+
+The reason is the blind spot itself. A clamped outcome gives the optimiser a **flat plateau**: no
+gradient, so nothing to climb. The crisis values still vary there, so pricing them restores a slope in
+a region where the honest objective has none. It is the same device as the trust-region merit function
+— when the thing you care about stops varying, score a proxy that still does — and it is why Chris's
+"solve the worst crisis first" beats a pure outcome objective rather than merely differing from it.
+
+Past that, the trade becomes real but stays cheap: **lambda 0.15 leaves exactly one harmful crisis
+running for 0.14 of X**, about 5%. And lambda 0.40 is worse on *both* counts (+2.829, 2 crises) —
+over-pricing starts chasing situation values at the expense of the outcomes they were standing in for.
+
+Two consequences:
+
+1. **lambda ~0.05 should be the default objective**, since it dominates lambda = 0 outright. Anything
+   above that is a genuine preference about how much welfare a quiet country is worth, and belongs to
+   the person choosing X rather than to the solver.
+2. The lambda = 0 run also hoards **+$458Bn** it never spends, while every priced run lands at −$0Bn.
+   The blind objective was not just tolerating crises, it was failing to find anything worth buying —
+   more evidence it had stalled on a plateau rather than reached an optimum.
+
