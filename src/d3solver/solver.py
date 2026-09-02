@@ -36,6 +36,13 @@ class Equilibrium:
     max_delta: float
     converged: bool
     unresolved: set[str] = field(default_factory=set)  # sources defaulted to 0 (reported, not hidden)
+    raw: dict[str, float] = field(default_factory=dict)
+    """The **unclamped** total for each node: ``default + sum(influences)`` before the min/max clamp.
+
+    Kept because a clamped node is an **optimisation shelf**. When CrimeRate pins at 0 with an
+    unclamped total of -0.43, the objective goes flat: further improvement scores nothing, so the
+    search stops and anything whose only channel is crime becomes free to ignore. The raw total still
+    varies across that region, so it can carry gradient where the honest value cannot."""
 
 
 def solve_equilibrium(
@@ -82,6 +89,7 @@ def solve_equilibrium(
 
     it = 0
     max_delta = 0.0
+    raw: dict[str, float] = {}
     for it in range(1, max_iter + 1):
         # hysteresis: update situation activation from current values (unless frozen)
         if not freeze_active:
@@ -99,6 +107,7 @@ def solve_equilibrium(
                 if e.source in active and not active[e.source]:
                     continue  # inactive situation exerts nothing
                 total += e.formula.evaluate(value_of(e.source), state)
+            raw[n] = total
             new[n] = _clamp(total, lo, hi)
 
         max_delta = 0.0
@@ -117,6 +126,7 @@ def solve_equilibrium(
         max_delta=max_delta,
         converged=max_delta < eps,
         unresolved=unresolved,
+        raw=raw,
     )
 
 

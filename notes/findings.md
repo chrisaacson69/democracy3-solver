@@ -887,3 +887,42 @@ the cost test only asked whether a lever was cheap *per dollar* and never whethe
 left to close the gap. A rate is not a plan — an exchange rate with no quantity attached will always
 say everything is affordable.
 
+## The shelf, measured: the objective is flat in 5 of its 6 dimensions
+
+Chris's framing — *"I was just trying to think of a way to normalize them so they wouldn't cause
+optimization shelves"* — turned out to be the diagnosis for the whole crisis thread, and the problem is
+much broader than crises. `Equilibrium` now reports `raw`, the unclamped `default + sum(influences)`
+before the min/max clamp. At the welfare optimum:
+
+| basket term | value | raw | |
+|---|---|---|---|
+| Equality | 1.000 | +1.485 | **pinned**, 0.485 wasted |
+| Health | 1.000 | +1.225 | **pinned**, 0.225 wasted |
+| GDP | 0.756 | +0.756 | interior |
+| Poverty | 0.000 | −0.206 | **pinned**, 0.206 wasted |
+| Unemployment | 0.000 | −0.529 | **pinned**, 0.529 wasted |
+| Crime | 0.000 | −0.981 | **pinned**, 0.981 wasted |
+
+**Five of six are pinned.** At that point the objective is flat in 83% of its own dimensions and the
+optimiser is effectively maximising GDP alone, because nothing else can register an improvement. The
+overshoot totals **2.03 units** of movement that bought nothing — crime alone driven 0.98 past a floor
+it had already reached.
+
+That one measurement explains the entire thread: the stall at +2.898 against two-stage's +2.979; the
+**$458Bn hoard** (nothing left to buy in five of six directions); crises being free to leave running;
+why pricing crises helps (their values still vary on the plateau); why crisis-first helps (a different
+basin, less pinned). Measured at both optima: welfare-only carries **2.030** of slack, welfare +
+crisis-price **1.850** — the crisis term shaves it slightly but neither escapes it.
+
+**A correction to the obvious fix.** The instinct is to *score the raw values*, since they carry
+gradient where the clamped ones do not. That is wrong, and the slack column shows why: raw gradient
+points toward **more overshoot**, and driving Crime to −1.5 instead of −0.98 is pure waste. The term
+wanted is the opposite sign — **penalise the slack**, so the optimiser stops paying for movement past a
+bound and redeploys it.
+
+**Not yet tested, and the reason is plumbing.** `make_objective` builds a linear weighting over node
+*values*, and `evaluate` passes only `eq.values` to the objective callable. Slack is
+`max(0, raw − max)`, so it cannot be expressed until `raw` is threaded through to the objective. That
+is the next concrete change, and until it is made, the claim that penalising slack helps is a
+hypothesis with a good mechanism behind it and no measurement.
+
