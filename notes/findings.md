@@ -986,3 +986,45 @@ Two consequences worth noting for whoever wires it up:
   values would trade real outcomes for tidiness at the boundary — the same over-pricing failure the
   crisis term showed at lambda 0.40.
 
+### Built and tested: the slack term works, and it does not help
+
+"Clamp the dynamics, score the raw" was enough to build on. `make_objective` now takes
+`slack_penalty` and `bounds`, `evaluate` passes `eq.raw` to the objective (with a `TypeError`
+fallback so single-argument callables keep working), and five tests pin the behaviour — including the
+one the symmetry argument implies directly: *further past the wall must always score worse, in both
+directions*. Every row below is scored on the **plain** welfare basket, so the comparison is fair.
+
+| objective | X | slack | harmful | balance |
+|---|---|---|---|---|
+| welfare only | **+2.898** | 2.030 | 9 | +$458Bn |
+| welfare + slack price 0.02 | +2.885 | **0.850** | 10 | +$1273Bn |
+| welfare + slack price 0.10 | +2.890 | 0.978 | 11 | +$514Bn |
+| *(crisis-first, two stage — for reference)* | **+2.979** | — | **4** | +$3Bn |
+
+**The term does exactly what it says and it buys nothing.** Waste falls 58% (2.030 → 0.850) and X does
+not improve — it drifts very slightly *down*. Worse, the freed budget just piles up: the hoard grows
+from $458Bn to **$1,273Bn**, and harmful crises tick up rather than down.
+
+The prediction going in was that this would happen, and the reason it did is the useful part.
+**Reducing waste does not unpin anything.** Five of six basket terms stay at their bounds, so the
+resources the penalty frees have nowhere to go — only GDP can absorb them, and not much. The shelf is
+not a *waste* problem, it is a **reachability** problem.
+
+That settles the ranking of the three fixes, which turn out to address three different symptoms:
+
+| fix | what it does | effect on X |
+|---|---|---|
+| **two-stage, crisis-first** | moves to a **less-pinned basin** | **+2.979 — the winner** |
+| crisis price | restores gradient the clamped outcomes cannot carry | +2.857 |
+| slack penalty | stops overpaying at a wall | +2.885 (no gain) |
+
+**You do not escape a plateau by spending more carefully on it — you escape by standing somewhere
+else.** The slack term is still worth keeping: it makes waste *visible and measurable*, which is how
+the shelf was diagnosed in the first place, and 2.03 units of pointless overshoot is worth knowing
+about even when removing it does not pay. But as an optimiser fix it is the weakest of the three, and
+crisis-first remains the recommendation.
+
+(Two further configurations — slack at 0.30, and crisis-price combined with slack — hit the 40-minute
+cap before running. The combined one is the only genuinely open question left here: gradient
+restoration and waste elimination together might do better than either alone.)
+

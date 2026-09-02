@@ -18,8 +18,38 @@ from .model import GameModel
 from .solver import solve_equilibrium
 
 
-def make_objective(weights: Mapping[str, float]) -> Callable[[Mapping[str, float]], float]:
-    return lambda values: sum(w * values.get(n, 0.0) for n, w in weights.items())
+def make_objective(weights: Mapping[str, float], *, slack_penalty: float = 0.0,
+                   bounds: Mapping[str, tuple[float, float]] | None = None):
+    """Build a scoring function over the settled state.
+
+    ``slack_penalty`` prices **wasted overshoot**: the distance between a node's unclamped total and
+    the bound it is pinned to. The game clamps every outcome to [0,1] (three to [-1,1]) and that clamp
+    is load-bearing in the *dynamics* — without it the network does not converge at all — but it need
+    not bind the *scoring*, because the pre-clamp total is computed anyway and thrown away.
+
+    Why a distance rather than a direction. Scoring the raw value upward chases an unreachable ceiling
+    and downward chases an unreachable floor; both are unbounded and both spend budget on movement the
+    world cannot register. The target is raw ≈ the bound: outcome maxed, nothing overpaid. So the term
+    is ``|raw - bound|``, zero when you have exactly reached the wall and rising whether you fall short
+    or push through it.
+
+    Keep the penalty small. It is a tie-breaker that restores gradient on a plateau — five of the six
+    welfare terms sit pinned at the optimum, so the objective is otherwise flat in most of its own
+    dimensions — not a competing objective. Over-pricing it trades real outcomes for tidiness at the
+    boundary.
+    """
+    def score(values: Mapping[str, float], raw: Mapping[str, float] | None = None) -> float:
+        total = sum(w * values.get(n, 0.0) for n, w in weights.items())
+        if slack_penalty and raw and bounds:
+            waste = 0.0
+            for n, (lo, hi) in bounds.items():
+                r = raw.get(n)
+                if r is None:
+                    continue
+                waste += max(0.0, r - hi) + max(0.0, lo - r)
+            total -= slack_penalty * waste
+        return total
+    return score
 
 
 def _cost(name, setting, ab, model, state, csv_cost_k):
@@ -38,7 +68,10 @@ def evaluate(model, settings, exo, objective, ab, csv_cost_k, csv_income_k,
              init_values=None, init_active=None, freeze_active=False):
     eq = solve_equilibrium(model, settings, exo, init_values=init_values, init_active=init_active,
                            freeze_active=freeze_active)
-    obj = objective(eq.values)
+    try:
+        obj = objective(eq.values, eq.raw)      # slack-aware objectives take the unclamped totals
+    except TypeError:
+        obj = objective(eq.values)              # hand-written single-argument callables still work
     inc = sum(_income(n, s, ab, model, eq.values, csv_income_k) for n, s in settings.items())
     cost = sum(_cost(n, s, ab, model, eq.values, csv_cost_k) for n, s in settings.items())
     return obj, inc - cost, eq

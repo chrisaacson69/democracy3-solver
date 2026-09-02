@@ -92,3 +92,40 @@ def test_elasticity_is_capped():
     ab = _ab(income_mult={"Tax": "GDP,0.001+(1.0*x)"}, anchor_state={"GDP": 0.0})
     huge = ab.income("Tax", 0.5, {"GDP": 1.0})
     assert huge <= ab.income("Tax", 0.5, None) * ab.max_elasticity + 1e-9
+
+
+# --- the slack term: price wasted overshoot, not direction ---------------------------------
+
+from d3solver.optimize import make_objective
+
+
+def test_slack_is_zero_when_the_node_is_interior():
+    o = make_objective({"A": 1.0}, slack_penalty=1.0, bounds={"A": (0.0, 1.0)})
+    assert o({"A": 0.5}, {"A": 0.5}) == pytest.approx(0.5)
+
+
+def test_overshooting_a_ceiling_is_penalised():
+    o = make_objective({"A": 1.0}, slack_penalty=1.0, bounds={"A": (0.0, 1.0)})
+    # clamped value is 1.0 either way; the raw total is what differs
+    assert o({"A": 1.0}, {"A": 1.0}) == pytest.approx(1.0)
+    assert o({"A": 1.0}, {"A": 1.4}) == pytest.approx(1.0 - 0.4)
+
+
+def test_undershooting_a_floor_is_penalised_the_same_way():
+    """A distance, not a direction: pushing past a floor is as wasteful as past a ceiling."""
+    o = make_objective({"A": -1.0}, slack_penalty=1.0, bounds={"A": (0.0, 1.0)})
+    assert o({"A": 0.0}, {"A": 0.0}) == pytest.approx(0.0)
+    assert o({"A": 0.0}, {"A": -0.4}) == pytest.approx(-0.4)
+
+
+def test_the_penalty_never_rewards_more_overshoot():
+    o = make_objective({"A": 1.0}, slack_penalty=0.5, bounds={"A": (0.0, 1.0)})
+    scores = [o({"A": 1.0}, {"A": r}) for r in (1.0, 1.5, 2.0, 3.0)]
+    assert scores == sorted(scores, reverse=True), "further past the wall must always score worse"
+
+
+def test_a_single_argument_objective_still_works():
+    """evaluate() passes raw now; hand-written 1-arg callables must not break."""
+    plain = make_objective({"A": 1.0})
+    assert plain({"A": 0.25}) == pytest.approx(0.25)
+    assert plain({"A": 0.25}, {"A": 0.25}) == pytest.approx(0.25)
